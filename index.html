@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zhouxing's Playground</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --bg-elev: #ffffff;
+    --ink: #1a1a1a;
+    --ink-2: #3d3d3d;
+    --ink-3: #6b6b6b;
+    --ink-4: #9a9a9a;
+    --line: #e8e6e0;
+    --accent: #2b2b2b;
+    --accent-soft: #f0eee8;
+    --blue: #3b74ff;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 10px 32px rgba(0,0,0,0.06);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.10), 0 16px 48px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Layout ---- */
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 48px 140px;
+  }
+
+  /* ---- Header ---- */
+  header {
+    padding-bottom: 64px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 72px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  header h1 {
+    font-size: clamp(42px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+
+  header h1 .dim {
+    color: var(--ink-4);
+    font-weight: 400;
+  }
+
+  .lede {
+    font-size: 18px;
+    color: var(--ink-3);
+    max-width: 600px;
+    line-height: 1.75;
+  }
+
+  .stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .stat .label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .stat .value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  /* ---- Grid ---- */
+  .grid-label {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  /* ---- Card ---- */
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+    border-color: #d0cec8;
+  }
+
+  .card:hover .card-arrow {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  /* Card top bar color accent */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, #e8e6e0);
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .card-accent-blue { --card-accent: linear-gradient(90deg, #3b74ff, #8a94ff); }
+  .card-accent-green { --card-accent: linear-gradient(90deg, #2f9e65, #4dd68c); }
+  .card-accent-purple { --card-accent: linear-gradient(90deg, #6b57ff, #a78bff); }
+  .card-accent-orange { --card-accent: linear-gradient(90deg, #ff6b35, #ff9a6b); }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    background: var(--accent-soft);
+  }
+
+  .card-arrow {
+    font-size: 18px;
+    color: var(--ink-4);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    margin-top: 2px;
+  }
+
+  .card-body {
+    flex: 1;
+  }
+
+  .card-num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--ink-4);
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+
+  .card-desc {
+    font-size: 14px;
+    color: var(--ink-3);
+    line-height: 1.7;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: var(--accent-soft);
+    border-radius: 99px;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
+  .tag-date {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-4);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Coming soon placeholder ---- */
+  .card-placeholder {
+    background: transparent;
+    border: 1.5px dashed var(--line);
+    box-shadow: none;
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .card-placeholder:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .card-placeholder::before {
+    display: none;
+  }
+
+  .card-placeholder .card-title {
+    color: var(--ink-4);
+  }
+
+  .card-placeholder .card-desc {
+    color: var(--ink-4);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    margin-top: 100px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  footer p {
+    font-size: 13px;
+    color: var(--ink-4);
+  }
+
+  footer .made-with {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-4);
+  }
+
+  footer .claude-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: var(--ink);
+    color: #fff;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 640px) {
+    .wrap { padding: 48px 24px 80px; }
+    header h1 { font-size: 36px; }
+    .grid { grid-template-columns: 1fr; }
+    .stats { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="eyebrow">Personal · Work in Progress</div>
+    <h1>Zhouxing's<br><span class="dim">Playground</span></h1>
+    <p class="lede">用 Claude 创建的各种页面与实验，持续更新中。</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="label">已发布</div>
+        <div class="value" id="count">1</div>
+      </div>
+      <div class="stat">
+        <div class="label">作者</div>
+        <div class="value" style="font-size:20px; padding-top:6px;">Zhouxing</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Grid -->
+  <div class="grid-label">All Projects</div>
+  <div class="grid">
+
+    <!-- Card 01 -->
+    <a class="card card-accent-blue" href="step-by-step-guide.html" target="_blank">
+      <div class="card-head">
+        <div class="card-icon">📐</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">No. 01</div>
+        <div class="card-title">Step-by-Step Guide · 设计案例集</div>
+        <div class="card-desc">收录了 Linear、Stripe、Vercel、Perplexity、Notion 五个顶级产品的引导流程设计拆解，附带交互示意与设计要点分析。</div>
+      </div>
+      <div class="card-footer">
+        <span class="tag">设计分析</span>
+        <span class="tag">Onboarding</span>
+        <span class="tag">产品</span>
+        <span class="tag-date">2025</span>
+      </div>
+    </a>
+
+    <!-- Placeholder -->
+    <div class="card card-placeholder">
+      <div class="card-head">
+        <div class="card-icon" style="opacity:0.4;">＋</div>
+      </div>
+      <div class="card-body">
+        <div class="card-num">No. 02</div>
+        <div class="card-title">即将更新…</div>
+        <div class="card-desc">下一个项目正在创作中，敬请期待。</div>
+      </div>
+      <div class="card-footer">
+        <span class="tag">Coming Soon</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Zhouxing · All pages built with Claude</p>
+    <div class="made-with">
+      Made with <span class="claude-badge">Claude</span>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

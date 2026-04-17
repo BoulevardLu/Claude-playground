@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Step-by-Step Guide · 设计案例集</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --bg-elev: #ffffff;
+    --ink: #1a1a1a;
+    --ink-2: #3d3d3d;
+    --ink-3: #6b6b6b;
+    --ink-4: #9a9a9a;
+    --line: #e8e6e0;
+    --line-2: #efede7;
+    --accent: #2b2b2b;
+    --accent-soft: #f0eee8;
+    --tag: #ece9e1;
+    --green: #2f9e65;
+    --blue: #3b74ff;
+    --purple: #6b57ff;
+    --orange: #ff6b35;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 10px 32px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "cv11";
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 80px 48px 120px; }
+
+  /* ---------- Cover ---------- */
+  .cover { padding: 40px 0 64px; border-bottom: 1px solid var(--line); margin-bottom: 64px; }
+  .eyebrow { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 24px; }
+  h1.title { font-size: 56px; line-height: 1.08; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 24px; }
+  h1.title em { font-style: normal; color: var(--ink-3); font-weight: 500; }
+  .lede { font-size: 19px; color: var(--ink-2); max-width: 760px; line-height: 1.7; }
+  .meta { display: flex; gap: 40px; margin-top: 40px; color: var(--ink-3); font-size: 14px; flex-wrap: wrap; }
+  .meta span strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ---------- TOC ---------- */
+  .toc {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 80px;
+  }
+  .toc h3 { font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 20px; font-weight: 600; }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; padding: 14px 0; border-top: 1px solid var(--line-2); display: flex; align-items: baseline; gap: 16px; }
+  .toc li:first-child { border-top: none; }
+  .toc li::before { content: counter(toc, decimal-leading-zero); font-size: 13px; color: var(--ink-4); font-variant-numeric: tabular-nums; min-width: 24px; }
+  .toc a { color: var(--ink); text-decoration: none; font-weight: 500; }
+  .toc a:hover { color: var(--blue); }
+  .toc .cat { font-size: 12px; color: var(--ink-4); margin-left: auto; background: var(--accent-soft); padding: 2px 10px; border-radius: 99px; }
+
+  /* ---------- Section ---------- */
+  section.case { margin-bottom: 120px; }
+  .case-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; margin-bottom: 40px; padding-top: 24px; border-top: 2px solid var(--ink); }
+  .case-header .num { font-size: 14px; color: var(--ink-4); letter-spacing: 0.08em; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+  .case-header h2 { font-size: 40px; letter-spacing: -0.02em; margin: 0 0 12px; line-height: 1.1; font-weight: 700; }
+  .case-header .subtitle { color: var(--ink-3); font-size: 17px; max-width: 680px; }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .tag { font-size: 12px; padding: 4px 10px; background: var(--tag); border-radius: 99px; color: var(--ink-2); letter-spacing: 0.02em; }
+
+  .brand-chip {
+    min-width: 88px; height: 88px; border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: white; flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-linear { background: linear-gradient(135deg, #5e6ad2 0%, #8a94ff 100%); }
+  .brand-stripe { background: linear-gradient(135deg, #635bff 0%, #8a85ff 100%); }
+  .brand-vercel { background: #000; }
+  .brand-perplexity { background: linear-gradient(135deg, #20808d 0%, #1fb8cd 100%); }
+  .brand-notion { background: #f7f7f5; color: #000; }
+
+  /* ---------- Flow overview ---------- */
+  .flow-overview {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 40px;
+  }
+  .flow-overview.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .flow-step-mini {
+    padding: 18px 16px; border-radius: 10px; background: var(--bg); position: relative;
+  }
+  .flow-step-mini .n { font-size: 11px; color: var(--ink-4); font-weight: 600; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .flow-step-mini .t { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .flow-step-mini .d { font-size: 12px; color: var(--ink-3); margin-top: 4px; line-height: 1.5; }
+
+  /* ---------- Step block ---------- */
+  .step {
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px;
+    padding: 40px 0; border-top: 1px solid var(--line);
+  }
+  .step:first-of-type { border-top: none; }
+
+  .step-mock {
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 28px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+    min-height: 400px;
+  }
+  .step-mock .browser-chrome {
+    display: flex; gap: 6px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line-2);
+  }
+  .step-mock .dot { width: 11px; height: 11px; border-radius: 50%; background: #e0ded8; }
+  .step-mock .dot:nth-child(1) { background: #ff5f57; }
+  .step-mock .dot:nth-child(2) { background: #febb30; }
+  .step-mock .dot:nth-child(3) { background: #27c940; }
+  .step-mock .addr { margin-left: 16px; font-size: 11px; color: var(--ink-4); background: var(--bg); padding: 3px 10px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .step-info .step-label { font-size: 13px; letter-spacing: 0.08em; font-weight: 600; color: var(--blue); margin-bottom: 12px; }
+  .step-info h3 { font-size: 26px; margin: 0 0 14px; letter-spacing: -0.01em; line-height: 1.25; }
+  .step-info p.desc { color: var(--ink-2); font-size: 15px; margin: 0 0 24px; line-height: 1.7; }
+
+  .info-block { margin-top: 24px; }
+  .info-block h4 {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-4);
+    font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .info-block h4::before { content: ""; width: 14px; height: 1px; background: var(--ink-4); }
+  .action-list { list-style: none; padding: 0; margin: 0; }
+  .action-list li {
+    padding: 8px 0; font-size: 14px; color: var(--ink-2); padding-left: 22px; position: relative; line-height: 1.55;
+  }
+  .action-list li::before {
+    content: ""; position: absolute; left: 0; top: 15px; width: 6px; height: 6px; border-radius: 50%; background: var(--ink);
+  }
+  .resource-list { display: flex; flex-direction: column; gap: 6px; }
+  .resource-list a {
+    display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;
+    background: var(--bg); border-radius: var(--radius-sm); text-decoration: none; color: var(--ink);
+    font-size: 13px; transition: background 0.15s;
+  }
+  .resource-list a:hover { background: var(--accent-soft); }
+  .resource-list a .arrow { color: var(--ink-4); font-size: 14px; }
+
+  /* ---------- Design analysis ---------- */
+  .analysis { background: var(--ink); color: #fff; border-radius: var(--radius); padding: 40px; margin-top: 48px; }
+  .analysis h3 { font-size: 20px; margin: 0 0 24px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
+  .analysis h3::before { content: ""; width: 6px; height: 20px; background: #fff; border-radius: 2px; }
+  .analysis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 8px; }
+  .analysis-col h4 {
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5);
+    margin: 0 0 14px; font-weight: 600;
+  }
+  .analysis-col p { color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.7; margin: 0 0 12px; }
+  .analysis-col p strong { color: #fff; }
+  .takeaway {
+    margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 15px; color: rgba(255,255,255,0.9); line-height: 1.7;
+  }
+  .takeaway strong { color: #fff; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; }
+
+  /* ---------- UI mockup elements (reusable) ---------- */
+  .ui-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .ui-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 20px; }
+  .ui-input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+    font-size: 13px; background: #fff; margin-bottom: 12px; font-family: inherit;
+  }
+  .ui-input.with-label { display: flex; flex-direction: column; }
+  .ui-label { font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; display: block; }
+  .ui-btn {
+    padding: 10px 18px; border-radius: 7px; background: var(--ink); color: #fff; border: none;
+    font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  }
+  .ui-btn.w-full { width: 100%; }
+  .ui-btn.outline { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .ui-progress {
+    display: flex; gap: 4px; margin-bottom: 20px;
+  }
+  .ui-progress .bar { height: 3px; flex: 1; background: var(--line); border-radius: 2px; }
+  .ui-progress .bar.active { background: var(--ink); }
+
+  /* Linear-specific */
+  .linear-mock { background: #0f0f10; color: #fff; border-radius: var(--radius); padding: 24px; }
+  .linear-mock .browser-chrome .dot { filter: brightness(0.8); }
+  .linear-mock .addr { background: #1e1e21; color: #888; }
+  .linear-mock .ui-title { color: #fff; }
+  .linear-mock .ui-sub { color: #7a7a80; }
+  .linear-mock .ui-input { background: #19191c; border-color: #2a2a2e; color: #fff; }
+  .linear-mock .ui-btn { background: #5e6ad2; }
+  .linear-mock .ui-label { color: #c4c4c8; }
+  .linear-mock .theme-choice { display: flex; gap: 12px; margin-top: 14px; }
+  .linear-mock .theme-card { flex: 1; aspect-ratio: 4/3; border-radius: 8px; border: 2px solid #2a2a2e; padding: 10px; position: relative; cursor: pointer; }
+  .linear-mock .theme-card.active { border-color: #5e6ad2; }
+  .linear-mock .theme-card.dark { background: #19191c; }
+  .linear-mock .theme-card.light { background: #f7f7f5; }
+  .linear-mock .theme-card .bar1 { width: 60%; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; margin-bottom: 4px; }
+  .linear-mock .theme-card .bar2 { width: 80%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .linear-mock .theme-card.light .bar1 { background: rgba(0,0,0,0.3); }
+  .linear-mock .theme-card.light .bar2 { background: rgba(0,0,0,0.15); }
+
+  /* Stripe-specific */
+  .stripe-mock .sidebar {
+    background: #fafaf5; border-radius: 10px; padding: 14px; margin-bottom: 16px;
+  }
+  .stripe-mock .task-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee;
+    font-size: 13px;
+  }
+  .stripe-mock .task-item:last-child { border-bottom: none; }
+  .stripe-mock .task-item .check {
+    width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #d0cdc5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .stripe-mock .task-item.done .check { background: #635bff; border-color: #635bff; color: #fff; font-size: 11px; }
+  .stripe-mock .task-item.done .check::after { content: "✓"; }
+  .stripe-mock .task-item.current { font-weight: 600; }
+  .stripe-mock .task-item.current .check { border-color: #635bff; }
+  .stripe-mock .task-item .meta { color: var(--ink-4); font-size: 11px; margin-left: auto; }
+  .stripe-mock .ui-btn { background: #635bff; }
+
+  /* Vercel-specific */
+  .vercel-mock { background: #000; color: #fff; border-radius: var(--radius); padding: 24px; }
+  .vercel-mock .browser-chrome .addr { background: #111; color: #888; }
+  .vercel-mock .ui-title { color: #fff; }
+  .vercel-mock .ui-sub { color: #888; }
+  .vercel-mock .repo-card {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px;
+  }
+  .vercel-mock .repo-card .icon { width: 28px; height: 28px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .vercel-mock .repo-card .name { font-size: 13px; font-weight: 500; }
+  .vercel-mock .repo-card .meta { font-size: 11px; color: #888; }
+  .vercel-mock .repo-card .btn { margin-left: auto; background: #fff; color: #000; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .vercel-mock .deploy-status {
+    background: #0a0a0a; border: 1px solid #222; border-radius: 10px; padding: 20px; margin-top: 14px; text-align: center;
+  }
+  .vercel-mock .deploy-status .check-circle {
+    width: 44px; height: 44px; margin: 0 auto 10px; background: #0f6027; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .vercel-mock .deploy-status .url { font-family: ui-monospace, monospace; font-size: 12px; color: #ccc; margin-top: 6px; }
+
+  /* Perplexity-specific */
+  .perplexity-mock .ai-greeting {
+    background: linear-gradient(135deg, #f0fcfd 0%, #e8f9fb 100%);
+    border: 1px solid #c5e9ed; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+  }
+  .perplexity-mock .ai-greeting .avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #20808d 0%, #1fb8cd 100%); margin-bottom: 10px;
+  }
+  .perplexity-mock .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .perplexity-mock .chip {
+    padding: 6px 14px; border-radius: 99px; background: #fff; border: 1px solid var(--line);
+    font-size: 12px; color: var(--ink-2); cursor: pointer;
+  }
+  .perplexity-mock .chip.active { background: #20808d; color: #fff; border-color: #20808d; }
+  .perplexity-mock .ui-btn { background: #20808d; }
+  .perplexity-mock .search-box { display: flex; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; gap: 10px; margin-top: 14px; }
+  .perplexity-mock .search-box .ph { color: var(--ink-4); font-size: 13px; flex: 1; }
+
+  /* Notion-specific */
+  .notion-mock { background: #fff; color: var(--ink); border-radius: var(--radius); padding: 28px; }
+  .notion-mock .ui-btn { background: #000; }
+  .notion-mock .q-block {
+    padding: 16px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px;
+  }
+  .notion-mock .q-block.selected { border-color: #000; border-width: 2px; padding: 15px; }
+  .notion-mock .q-block .q-title { font-size: 14px; font-weight: 600; }
+  .notion-mock .q-block .q-desc { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  .notion-mock .template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .notion-mock .template-card { aspect-ratio: 4/5; border-radius: 8px; background: var(--bg); padding: 10px; font-size: 11px; color: var(--ink-2); position: relative; }
+  .notion-mock .template-card .icon { font-size: 20px; margin-bottom: 8px; }
+  .notion-mock .template-card .title { font-weight: 600; font-size: 12px; color: var(--ink); }
+
+  /* ---------- Meta patterns section ---------- */
+  .patterns {
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 48px; margin-top: 80px;
+  }
+  .patterns h2 { font-size: 32px; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .patterns .lede { font-size: 16px; margin-bottom: 32px; }
+  .pattern-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .pattern-card {
+    padding: 24px; background: var(--bg); border-radius: var(--radius-sm);
+  }
+  .pattern-card h4 { margin: 0 0 8px; font-size: 16px; }
+  .pattern-card p { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.65; }
+  .pattern-card .ex { margin-top: 12px; font-size: 12px; color: var(--ink-4); }
+
+  /* ---------- Footer ---------- */
+  footer { margin-top: 96px; padding-top: 32px; border-top: 1px solid var(--line); color: var(--ink-4); font-size: 13px; }
+  footer .sources { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+  footer .sources a { color: var(--ink-3); text-decoration: none; }
+  footer .sources a:hover { color: var(--ink); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .wrap { padding: 40px 24px 80px; }
+    h1.title { font-size: 36px; }
+    .step { grid-template-columns: 1fr; gap: 24px; }
+    .analysis-grid { grid-template-columns: 1fr; gap: 20px; }
+    .flow-overview, .flow-overview.cols-3 { grid-template-columns: 1fr 1fr; }
+    .case-header { flex-direction: column; gap: 20px; }
+    .pattern-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Print / PDF */
+  @media print {
+    body { background: #fff; }
+    .step, .case { page-break-inside: avoid; }
+    .analysis { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ COVER ============ -->
+  <header class="cover">
+    <div class="eyebrow">Design Research · Step-by-Step Guide · 2026</div>
+    <h1 class="title">Step-by-Step Guide<br/><em>五个值得参考的分步引导案例</em></h1>
+    <p class="lede">
+      这份研究基于 Refero、Page Flows 等设计参考库，挑选了 SaaS、金融、AI、开发工具四个领域的五个代表性 step-by-step guide。
+      每个案例都从 <strong>信息架构 → 文案策略 → 视觉表达</strong> 三个维度做了拆解，目的是沉淀一份可复用的分步引导设计模式手册，供后续产品设计参考。
+    </p>
+    <div class="meta">
+      <span><strong>案例数量</strong>5 个</span>
+      <span><strong>覆盖领域</strong>SaaS · Fintech · Dev Tool · AI</span>
+      <span><strong>分析维度</strong>交互 · 文案 · 视觉</span>
+      <span><strong>文档类型</strong>HTML 设计研究</span>
+    </div>
+  </header>
+
+  <!-- ============ TOC ============ -->
+  <nav class="toc">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#linear">Linear · 创建 Workspace 极简四步流</a><span class="cat">SaaS 生产力</span></li>
+      <li><a href="#stripe">Stripe · 账户激活任务清单</a><span class="cat">Fintech</span></li>
+      <li><a href="#vercel">Vercel · 新项目三步部署</a><span class="cat">Dev Tool</span></li>
+      <li><a href="#perplexity">Perplexity · AI 偏好个性化</a><span class="cat">AI 产品</span></li>
+      <li><a href="#notion">Notion · 角色驱动模板引导</a><span class="cat">SaaS 生产力</span></li>
+      <li><a href="#patterns">共性模式总结</a><span class="cat">综合分析</span></li>
+    </ol>
+  </nav>
+
+  <!-- ============ CASE 1: LINEAR ============ -->
+  <section class="case" id="linear">
+    <div class="case-header">
+      <div>
+        <div class="num">CASE 01 / 05</div>
+        <h2>Linear · 创建 Workspace</h2>
+        <p class="subtitle">极简主义范式。"一屏一问" 的设计纪律，把 workspace 创建拆成近乎清汤寡水的四步，却让用户完全感觉不到任务量。</p>
+        <div class="tags">
+          <span class="tag">SaaS</span>
+          <span class="tag">Workspace Setup</span>
+          <span class="tag">深色主题</span>
+          <span class="tag">一屏一问</span>
+        </div>
+      </div>
+      <div class="brand-chip brand-linear">L</div>
+    </div>
+
+    <div class="flow-overview">
+      <div class="flow-step-mini"><div class="n">STEP 01</div><div class="t">身份登录</div><div class="d">Google / GitHub OAuth</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 02</div><div class="t">命名 Workspace</div><div class="d">名称 + URL slug</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 03</div><div class="t">选择主题</div><div class="d">Light / Dark 二选一</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 04</div><div class="t">邀请成员</div><div class="d">输入邮箱或直接跳过</div></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-mock linear-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">linear.app/signup</span>
+        </div>
+        <div style="padding: 20px 8px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#5e6ad2,#8a94ff);margin-bottom:24px;"></div>
+          <div class="ui-title">Welcome to Linear</div>
+          <div class="ui-sub">Sign up in seconds. No credit card required.</div>
+          <button class="ui-btn w-full" style="background:#fff;color:#000;margin-bottom:10px;">Continue with Google</button>
+          <button class="ui-btn w-full" style="background:#19191c;border:1px solid #2a2a2e;margin-bottom:10px;">Continue with GitHub</button>
+          <button class="ui-btn w-full" style="background:transparent;border:1px solid #2a2a2e;color:#c4c4c8;">Continue with email</button>
+          <div style="font-size:11px;color:#555;text-align:center;margin-top:20px;">By continuing, you agree to our Terms of Service.</div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 01 · 进入</div>
+        <h3>快速建立身份：OAuth 优先，邮箱兜底</h3>
+        <p class="desc">
+          Linear 把登录简化到极致 —— Google、GitHub 两个 OAuth 通道在首位，Email 方式降级为第三选项。
+          这是典型的 "开发者工具约束" ：目标用户大概率已有 GitHub，引导即身份验证。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>登录方式以品牌 button 形式平铺，不使用 tab 或下拉，减少决策成本</li>
+            <li>Google 白色按钮视觉权重最高，暗示推荐路径</li>
+            <li>副文案一句话说明 "秒级注册 + 无需信用卡"，消除心理门槛</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://refero.design/flows" target="_blank">Refero · Linear Onboarding Flow <span class="arrow">↗</span></a>
+            <a href="https://pageflows.com/post/desktop-web/onboarding/linear/" target="_blank">PageFlows · Linear 完整流程录屏 <span class="arrow">↗</span></a>
+            <a href="https://linear.app/docs/start-guide" target="_blank">Linear Start Guide 官方文档 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-mock linear-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">linear.app/onboarding/workspace</span>
+        </div>
+        <div style="padding: 16px 8px;">
+          <div class="ui-progress">
+            <div class="bar active"></div><div class="bar active"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+          <div class="ui-title">Create your workspace</div>
+          <div class="ui-sub">Workspaces are where you and your team collaborate.</div>
+          <div style="margin-top:20px;">
+            <label class="ui-label">WORKSPACE NAME</label>
+            <input class="ui-input" value="Acme Design" />
+            <label class="ui-label">WORKSPACE URL</label>
+            <div style="display:flex;align-items:center;background:#19191c;border:1px solid #2a2a2e;border-radius:6px;overflow:hidden;">
+              <span style="padding:10px 12px;color:#888;font-size:13px;">linear.app/</span>
+              <input style="flex:1;background:transparent;border:none;padding:10px 0;color:#fff;font-size:13px;outline:none;" value="acme-design" />
+            </div>
+          </div>
+          <button class="ui-btn w-full" style="margin-top:20px;">Continue →</button>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 02 · 命名</div>
+        <h3>一屏一问：只让用户填 Workspace 名字</h3>
+        <p class="desc">
+          整个屏幕只有两个输入框，而且后者（URL slug）会根据第一个自动生成。
+          这是 Linear 引导设计的灵魂 —— <strong>一屏只让用户做一件事</strong>，即便整个流程有 10 步以上也不会觉得冗长。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>顶部 4 段 progress bar 用点亮数量暗示进度，不用 "Step 2 of 4" 这种文本</li>
+            <li>URL 输入框拆成 prefix + slug 两段，明确告诉用户生成的是什么</li>
+            <li>URL slug 会实时联动 workspace 名字，减少二次输入</li>
+            <li>Continue 按钮放在右下固定位置，培养肌肉记忆</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://fmerian.medium.com/delightful-onboarding-experience-the-linear-ftux-cf56f3bc318c" target="_blank">Medium · Linear FTUX 全流程拆解 <span class="arrow">↗</span></a>
+            <a href="https://supademo.com/user-flow-examples/linear" target="_blank">Supademo · 屏幕级拆解 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-mock linear-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">linear.app/onboarding/theme</span>
+        </div>
+        <div style="padding: 16px 8px;">
+          <div class="ui-progress">
+            <div class="bar active"></div><div class="bar active"></div><div class="bar active"></div><div class="bar"></div>
+          </div>
+          <div class="ui-title">Pick your theme</div>
+          <div class="ui-sub">You can change this later in Settings.</div>
+          <div class="theme-choice">
+            <div class="theme-card dark active">
+              <div class="bar1"></div><div class="bar2"></div>
+              <div style="position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:4px;">
+                <div style="flex:1;height:18px;background:rgba(255,255,255,0.08);border-radius:3px;"></div>
+                <div style="flex:1;height:18px;background:rgba(255,255,255,0.08);border-radius:3px;"></div>
+              </div>
+            </div>
+            <div class="theme-card light">
+              <div class="bar1"></div><div class="bar2"></div>
+              <div style="position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:4px;">
+                <div style="flex:1;height:18px;background:rgba(0,0,0,0.05);border-radius:3px;"></div>
+                <div style="flex:1;height:18px;background:rgba(0,0,0,0.05);border-radius:3px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:10px;font-size:12px;color:#888;">
+            <div style="flex:1;text-align:center;color:#c4c4c8;">Dark</div>
+            <div style="flex:1;text-align:center;">Light</div>
+          </div>
+          <button class="ui-btn w-full" style="margin-top:20px;">Continue →</button>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 03 · 个性化</div>
+        <h3>把审美选择前置：主题作为品牌第一触点</h3>
+        <p class="desc">
+          Linear 很少见地把主题选择放到 onboarding 第三步。这步几乎不影响功能可用性，却有两个设计意图：
+          让产品的视觉风格 <strong>立即与用户审美达成契约</strong>；为后面的功能页承接做视觉预览。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>两张缩略图而非文字选项，让用户 "看到" 而不是 "想象"</li>
+            <li>附加一句 "You can change this later"，降低决策焦虑</li>
+            <li>默认高亮 Dark 主题，与开发者用户画像匹配</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://medium.com/design-bootcamp/hands-on-learning-cinematic-transition-linears-thoughtful-onboarding-aa4f16c33d90" target="_blank">Medium · 电影化的 onboarding 过渡 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-mock linear-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">linear.app/onboarding/invite</span>
+        </div>
+        <div style="padding: 16px 8px;">
+          <div class="ui-progress">
+            <div class="bar active"></div><div class="bar active"></div><div class="bar active"></div><div class="bar active"></div>
+          </div>
+          <div class="ui-title">Invite your teammates</div>
+          <div class="ui-sub">Linear works best with your team. Add them now or later.</div>
+          <div style="margin-top:20px;">
+            <label class="ui-label">EMAIL ADDRESSES</label>
+            <textarea class="ui-input" style="min-height:80px;font-family:inherit;resize:none;" placeholder="name@company.com, ...">jenny@acme.co, marcus@acme.co</textarea>
+          </div>
+          <div style="background:#19191c;border:1px solid #2a2a2e;border-radius:8px;padding:12px;font-size:12px;color:#888;margin-top:8px;">
+            <span style="color:#5e6ad2;">💡</span> Anyone with an <strong style="color:#fff;">@acme.co</strong> email can auto-join this workspace.
+          </div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="ui-btn" style="flex:1;background:transparent;border:1px solid #2a2a2e;color:#c4c4c8;">Skip for now</button>
+            <button class="ui-btn" style="flex:1;">Send invites</button>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 04 · 扩展</div>
+        <h3>协作预埋：邀请 + 域名自动加入双保险</h3>
+        <p class="desc">
+          最后一步通常是最容易被跳过的，Linear 在这里做了两件事：直接的邮箱输入 + 基于邮箱域名的自动加入。
+          对 B2B SaaS 来说，后者极大提升了邀请转化率 —— 用户只需输入一次自己的公司邮箱。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>提供 "Skip for now" 显式退出，减少用户被绑架感</li>
+            <li>高亮展示 "domain auto-join" 规则，让用户理解价值</li>
+            <li>两个按钮等宽并列，不把 skip 藏到角落里</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://linear.app/changelog/2019-12-12-onboarding-join-teams" target="_blank">Linear Changelog · Domain Auto-join <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>设计分析 · Linear 范式</h3>
+      <div class="analysis-grid">
+        <div class="analysis-col">
+          <h4>交互与信息架构</h4>
+          <p><strong>"一屏一问" 哲学。</strong>把一个原本复杂的 setup 拆成极薄的单步骤，每步只收集一个关键字段。</p>
+          <p><strong>进度条用点亮而非百分比。</strong>避免告诉用户 "还有 75% 要走"，只让用户感受到不断有事情被完成。</p>
+          <p><strong>Skip 显式化。</strong>非必填步骤永远提供跳过选项，把控制权还给用户。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>文案与引导策略</h4>
+          <p><strong>短句 + 零术语。</strong>每屏副文案不超过一行。没有 "workspace synergy" 这种营销话术。</p>
+          <p><strong>"Later" 是高频词。</strong>"You can change this later" 在 3 个步骤中反复出现 —— 这是 Linear 降低用户焦虑的主策略。</p>
+          <p><strong>主 CTA 永远在右下。</strong>Continue / Send invites 始终在同一位置，用户从不需要寻找下一步。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>视觉风格</h4>
+          <p><strong>极简深色基底。</strong>#0f0f10 背景 + #5e6ad2 品牌紫，无任何装饰性插画。</p>
+          <p><strong>等宽字母的代码感。</strong>工作区 URL slug 用 monospace 字体暗示 "这是技术栈的一部分"。</p>
+          <p><strong>缩略主题卡。</strong>在选择 Light / Dark 时直接绘制迷你 UI 预览，让视觉承诺即所见。</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <strong>可复用模式</strong> 当你的产品面向技术型用户、需要在 workspace/团队 setup 场景下建立协作关系时，Linear 是最佳范式参考。核心三件套：OAuth 优先登录、一屏一问的分步推进、Skip + Later 的低压策略。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CASE 2: STRIPE ============ -->
+  <section class="case" id="stripe">
+    <div class="case-header">
+      <div>
+        <div class="num">CASE 02 / 05</div>
+        <h2>Stripe · 激活你的账户</h2>
+        <p class="subtitle">任务清单范式。把合规性极强、字段极多的 KYC 流程，用一个可见进度的 checklist 拆解，让枯燥的表单变成 "打勾爽感"。</p>
+        <div class="tags">
+          <span class="tag">Fintech</span>
+          <span class="tag">账户激活</span>
+          <span class="tag">任务清单</span>
+          <span class="tag">KYC 合规</span>
+        </div>
+      </div>
+      <div class="brand-chip brand-stripe">S</div>
+    </div>
+
+    <div class="flow-overview">
+      <div class="flow-step-mini"><div class="n">STEP 01</div><div class="t">企业信息</div><div class="d">名称、类型、网址</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 02</div><div class="t">身份验证</div><div class="d">法人身份证件上传</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 03</div><div class="t">银行账户</div><div class="d">对公收款账户绑定</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 04</div><div class="t">首笔收款</div><div class="d">跳转 dashboard 创建支付</div></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-mock stripe-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">dashboard.stripe.com/activate</span>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div style="width:200px;">
+            <div style="font-size:11px;font-weight:600;color:var(--ink-4);letter-spacing:0.1em;margin-bottom:12px;">ACTIVATION</div>
+            <div class="sidebar">
+              <div class="task-item done"><span class="check"></span>Account created</div>
+              <div class="task-item current"><span class="check"></span>Business details</div>
+              <div class="task-item"><span class="check"></span>Verify identity</div>
+              <div class="task-item"><span class="check"></span>Bank account</div>
+            </div>
+            <div style="font-size:11px;color:var(--ink-4);margin-top:12px;">约 5 分钟完成</div>
+          </div>
+          <div style="flex:1;">
+            <div class="ui-title">Tell us about your business</div>
+            <div class="ui-sub">We'll use this to set up your Stripe account and verify your identity.</div>
+            <label class="ui-label">LEGAL BUSINESS NAME</label>
+            <input class="ui-input" value="Acme Technology Co., Ltd." />
+            <label class="ui-label">BUSINESS TYPE</label>
+            <select class="ui-input"><option>Private company</option></select>
+            <label class="ui-label">WEBSITE</label>
+            <input class="ui-input" value="https://acme.co" />
+            <button class="ui-btn" style="margin-top:8px;">Continue</button>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 01 · 采集</div>
+        <h3>左侧 checklist + 右侧表单：永远知道还剩什么</h3>
+        <p class="desc">
+          Stripe 把整个激活流程结构化成 <strong>左侧 4-6 个任务 + 右侧当前任务表单</strong>。这种 master-detail 结构的好处：用户随时能看到全貌，不会因步骤多而焦虑。
+          已完成任务用紫色对勾，当前任务用空心圆圈 + 粗体标识。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>Checklist 把 "Account created" 作为已完成项预埋，给用户初始成就感</li>
+            <li>"约 5 分钟完成" 时间预期放在 checklist 下方，管理用户期望</li>
+            <li>表单字段精简到 3 个，复杂字段（比如 tax ID）被推到后续步骤</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://docs.stripe.com/connect/onboarding" target="_blank">Stripe Docs · Onboarding Configuration <span class="arrow">↗</span></a>
+            <a href="https://stripe.com/resources/more/merchant-onboarding-explained" target="_blank">Stripe Guide · Merchant Onboarding <span class="arrow">↗</span></a>
+            <a href="https://refero.design/flows" target="_blank">Refero · Stripe 流程截图 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-mock stripe-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">dashboard.stripe.com/activate/identity</span>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div style="width:200px;">
+            <div style="font-size:11px;font-weight:600;color:var(--ink-4);letter-spacing:0.1em;margin-bottom:12px;">ACTIVATION</div>
+            <div class="sidebar">
+              <div class="task-item done"><span class="check"></span>Account created</div>
+              <div class="task-item done"><span class="check"></span>Business details</div>
+              <div class="task-item current"><span class="check"></span>Verify identity</div>
+              <div class="task-item"><span class="check"></span>Bank account</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="ui-title">Verify your identity</div>
+            <div class="ui-sub">To prevent fraud, we're required to verify you're a real person.</div>
+            <div style="background:#fafaf5;border:1px dashed #d0cdc5;border-radius:10px;padding:24px;text-align:center;margin-top:16px;">
+              <div style="width:48px;height:48px;margin:0 auto 12px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">📷</div>
+              <div style="font-size:14px;font-weight:600;">Upload photo ID</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">Driver's license, passport, or government ID</div>
+              <button class="ui-btn outline" style="margin-top:14px;">Choose file</button>
+            </div>
+            <div style="font-size:11px;color:var(--ink-4);margin-top:12px;line-height:1.5;">
+              🔒 Your documents are encrypted and only used for verification. They're never shared with third parties.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 02 · 信任</div>
+        <h3>在敏感步骤前，把 "为什么" 写在最上面</h3>
+        <p class="desc">
+          身份验证是整个流程最敏感的一步。Stripe 的做法不是直接要文件，而是先写 <strong>"To prevent fraud, we're required to verify you're a real person"</strong> —— 把合规责任从用户转移到监管。
+          底部加密说明，进一步降低用户的文件上传抗拒。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>先解释 "为什么"，再展示 "怎么做"，顺序绝不可颠倒</li>
+            <li>拖拽上传区使用虚线描边，暗示这是非正式输入区域</li>
+            <li>小字底部说明加密和使用范围，打消用户的隐私顾虑</li>
+            <li>相机 emoji 作为视觉 affordance，比通用 icon 更亲和</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://docs.stripe.com/connect/supported-embedded-components/account-onboarding" target="_blank">Stripe Docs · Account Onboarding Component <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-mock stripe-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">dashboard.stripe.com/activate/payout</span>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div style="width:200px;">
+            <div style="font-size:11px;font-weight:600;color:var(--ink-4);letter-spacing:0.1em;margin-bottom:12px;">ACTIVATION</div>
+            <div class="sidebar">
+              <div class="task-item done"><span class="check"></span>Account created</div>
+              <div class="task-item done"><span class="check"></span>Business details</div>
+              <div class="task-item done"><span class="check"></span>Verify identity</div>
+              <div class="task-item current"><span class="check"></span>Bank account</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="ui-title">Where should we send your payouts?</div>
+            <div class="ui-sub">Payouts arrive in 2 business days after your first charge.</div>
+            <label class="ui-label">ROUTING NUMBER</label>
+            <input class="ui-input" value="110000000" />
+            <label class="ui-label">ACCOUNT NUMBER</label>
+            <input class="ui-input" type="password" value="••••••••6789" />
+            <label class="ui-label">ACCOUNT HOLDER NAME</label>
+            <input class="ui-input" value="Acme Technology Co., Ltd." />
+            <div style="background:#f0f7ff;border:1px solid #c9dcff;border-radius:8px;padding:12px;font-size:12px;color:#2a4eaa;margin-top:12px;">
+              💳 Or connect instantly with your bank via <strong>Plaid</strong>
+            </div>
+            <button class="ui-btn" style="margin-top:16px;">Save and continue</button>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 03 · 价值</div>
+        <h3>把无聊的银行字段包装成 "payouts 何时到账"</h3>
+        <p class="desc">
+          同样是收集银行卡号，不同产品写的是 "输入银行账户"，Stripe 写的是 <strong>"Where should we send your payouts?"</strong> —— 把操作对应到商家真正在意的结果（收款到账）。
+          一句 "Payouts arrive in 2 business days" 进一步强化价值感知。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>标题用问句形式，直接把用户利益摆在最前</li>
+            <li>账号字段默认 password mask，视觉暗示敏感度</li>
+            <li>提供 Plaid 即时连接作为 "快捷通道"，降低手动输入出错率</li>
+            <li>蓝色 tips 框颜色区别于流程主色，提示这是可选替代方案</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://docs.stripe.com/connect/custom/hosted-onboarding" target="_blank">Stripe Docs · Hosted Onboarding <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-mock stripe-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">dashboard.stripe.com/home</span>
+        </div>
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="width:64px;height:64px;margin:0 auto 20px;background:#635bff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;">🎉</div>
+          <div class="ui-title" style="font-size:24px;">You're ready to accept payments</div>
+          <div class="ui-sub">Test your integration in the next 60 seconds.</div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;">
+            <div style="background:#fafaf5;border:1px solid var(--line);border-radius:10px;padding:16px;width:180px;text-align:left;">
+              <div style="font-size:11px;color:var(--ink-4);letter-spacing:0.1em;margin-bottom:6px;">RECOMMENDED</div>
+              <div style="font-weight:600;font-size:14px;">Create payment link</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">No code required</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;width:180px;text-align:left;">
+              <div style="font-size:11px;color:var(--ink-4);letter-spacing:0.1em;margin-bottom:6px;">FOR DEVS</div>
+              <div style="font-weight:600;font-size:14px;">Install Stripe SDK</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">Node · Python · Ruby · PHP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 04 · 启航</div>
+        <h3>激活完成不等于结束：提供下一个可执行动作</h3>
+        <p class="desc">
+          流程结束时最容易犯的错误是扔一句 "All done!" 就把用户推进 dashboard。Stripe 在这里提供了两条分叉路径 —— <strong>Payment Link（无代码）</strong>和<strong>开发者 SDK</strong>，让用户立即能做下一件有意义的事。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>成功页用 emoji + 文案强化情绪峰值</li>
+            <li>"Test in 60 seconds" 给出非常具体的时间承诺，刺激立刻行动</li>
+            <li>两张卡片按用户角色（non-dev / dev）分岔，不强迫选择</li>
+            <li>"RECOMMENDED" 标签低调引导，不是强制路径</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://stripe.com/connect/onboarding" target="_blank">Stripe Connect · Onboarding Page <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>设计分析 · Stripe 范式</h3>
+      <div class="analysis-grid">
+        <div class="analysis-col">
+          <h4>交互与信息架构</h4>
+          <p><strong>Master-detail 持续可见。</strong>左侧 checklist 全程不变，用户随时知道自己在哪、还剩多少。</p>
+          <p><strong>任务单元化。</strong>每个任务都能独立保存、离开、回来继续，因为合规流程常常要等材料/审核。</p>
+          <p><strong>成功后再分岔。</strong>在所有必填任务完成后才提供多条 "下一步" 路径，避免主流程被打断。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>文案与引导策略</h4>
+          <p><strong>利益前置、合规后置。</strong>"Where should we send your payouts?" 比 "Enter your bank info" 有效 10 倍。</p>
+          <p><strong>合规字段都配 why。</strong>"To prevent fraud..." 把收集行为转化成 "我们在保护你"。</p>
+          <p><strong>时间承诺具体化。</strong>"2 business days"、"60 seconds" 这种量化描述降低不确定感。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>视觉风格</h4>
+          <p><strong>品牌紫 + 米白底色。</strong>#635bff 是关键动作与完成标记专属色，其他所有元素保持中性。</p>
+          <p><strong>对勾的仪式感。</strong>紫色圆形对勾是整个流程的视觉锚点 —— 让 "打勾" 这个动作本身成为奖励。</p>
+          <p><strong>隐私图标不抢戏。</strong>🔒 emoji 出现在小字说明里，而不是大号 badge，信任靠文案建立。</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <strong>可复用模式</strong> 当你的产品涉及 KYC、合规、必须收集多类字段（个人信息 / 身份 / 银行）时，Stripe 是最佳参考。核心三件套：左侧 checklist 提供全局进度、每步配 why 说明减少戒备、成功态提供下一步的分岔选择。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CASE 3: VERCEL ============ -->
+  <section class="case" id="vercel">
+    <div class="case-header">
+      <div>
+        <div class="num">CASE 03 / 05</div>
+        <h2>Vercel · 部署你的第一个项目</h2>
+        <p class="subtitle">"连通器" 范式。三步从 git 仓库到生产环境 URL，整个流程的设计目标不是 "引导"，而是 "不要打扰用户"。</p>
+        <div class="tags">
+          <span class="tag">Dev Tool</span>
+          <span class="tag">3 步部署</span>
+          <span class="tag">Git 集成</span>
+          <span class="tag">黑白极简</span>
+        </div>
+      </div>
+      <div class="brand-chip brand-vercel">▲</div>
+    </div>
+
+    <div class="flow-overview cols-3">
+      <div class="flow-step-mini"><div class="n">STEP 01</div><div class="t">导入仓库</div><div class="d">从 GitHub / GitLab 选择</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 02</div><div class="t">配置项目</div><div class="d">框架、环境变量、域名</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 03</div><div class="t">部署上线</div><div class="d">Build + 分配 URL</div></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-mock vercel-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">vercel.com/new</span>
+        </div>
+        <div class="ui-title">Let's build something new.</div>
+        <div class="ui-sub">To deploy a new Project, import an existing Git Repository.</div>
+        <div style="display:flex;gap:20px;margin-top:20px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+              <span style="font-size:14px;">🔍</span>
+              <input style="flex:1;background:transparent;border:none;color:#fff;font-size:13px;outline:none;" placeholder="Search repositories..." value="next" />
+            </div>
+            <div class="repo-card">
+              <div class="icon">⚡</div>
+              <div>
+                <div class="name">acme-design/next-marketing-site</div>
+                <div class="meta">main · updated 2h ago</div>
+              </div>
+              <div class="btn">Import</div>
+            </div>
+            <div class="repo-card">
+              <div class="icon">⚡</div>
+              <div>
+                <div class="name">acme-design/next-dashboard</div>
+                <div class="meta">main · updated 1d ago</div>
+              </div>
+              <div class="btn" style="background:#222;color:#fff;">Import</div>
+            </div>
+            <div class="repo-card">
+              <div class="icon">⚡</div>
+              <div>
+                <div class="name">acme-design/blog</div>
+                <div class="meta">main · updated 3d ago</div>
+              </div>
+              <div class="btn" style="background:#222;color:#fff;">Import</div>
+            </div>
+          </div>
+          <div style="width:220px;padding:16px;background:#0a0a0a;border:1px solid #222;border-radius:8px;">
+            <div style="font-size:11px;color:#888;letter-spacing:0.1em;margin-bottom:10px;">CLONE TEMPLATE</div>
+            <div style="font-size:12px;color:#fff;margin-bottom:8px;">Next.js</div>
+            <div style="font-size:12px;color:#fff;margin-bottom:8px;">SvelteKit</div>
+            <div style="font-size:12px;color:#fff;margin-bottom:8px;">Astro</div>
+            <div style="font-size:12px;color:#888;">+ 12 templates</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 01 · 导入</div>
+        <h3>从仓库开始：零配置入口</h3>
+        <p class="desc">
+          Vercel 的核心假设是 <strong>代码已经存在于 Git</strong>。首屏不问框架、不问技术栈，只让用户挑一个仓库。
+          右侧 "Clone Template" 是为还没有代码的用户准备的分叉路径，但视觉上刻意弱化。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>仓库列表按最近更新时间排序，减少搜索成本</li>
+            <li>搜索框默认聚焦，键盘用户直接开始输入</li>
+            <li>"Import" 主按钮只给第一个仓库，其他保持次级样式，避免视觉喧宾夺主</li>
+            <li>Template 放在窄侧栏，表明 "仅当你没有现成代码时" 才用</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://vercel.com/new" target="_blank">Vercel · New Project 页面 <span class="arrow">↗</span></a>
+            <a href="https://vercel.com/docs/getting-started-with-vercel" target="_blank">Vercel Docs · Getting Started <span class="arrow">↗</span></a>
+            <a href="https://vercel.com/docs/git" target="_blank">Vercel Docs · Git Deployments <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-mock vercel-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">vercel.com/new/configure</span>
+        </div>
+        <div class="ui-title">Configure Project</div>
+        <div class="ui-sub">acme-design/next-marketing-site</div>
+        <div style="margin-top:20px;">
+          <label class="ui-label" style="color:#888;">PROJECT NAME</label>
+          <input class="ui-input" style="background:#0a0a0a;border-color:#222;color:#fff;" value="next-marketing-site" />
+          <label class="ui-label" style="color:#888;">FRAMEWORK PRESET</label>
+          <div style="display:flex;align-items:center;gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:6px;padding:10px 12px;margin-bottom:12px;">
+            <span style="font-size:14px;">⚡</span>
+            <span style="color:#fff;font-size:13px;">Next.js</span>
+            <span style="margin-left:auto;font-size:11px;color:#888;">Detected ✓</span>
+          </div>
+          <div style="background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px;cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;color:#fff;">Environment Variables</span>
+              <span style="color:#888;font-size:18px;">›</span>
+            </div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">Optional. Add DATABASE_URL, API_KEY, etc.</div>
+          </div>
+        </div>
+        <button class="ui-btn w-full" style="background:#fff;color:#000;margin-top:14px;">Deploy</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 02 · 配置</div>
+        <h3>自动检测 + 可选展开：不懂的字段不打扰你</h3>
+        <p class="desc">
+          Framework Preset 被自动识别并显示 "Detected ✓"，用户几乎不用动。环境变量这种可能让新手困惑的字段被折叠成一个可展开的卡片，不出现在必填路径上。
+          这是 "<strong>零配置默认值</strong>" 的极致实践。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>所有检测到的字段配 "Detected ✓" 徽章，暗示 "你不用做决定"</li>
+            <li>环境变量、Build Command、Install Command 等高级字段默认折叠</li>
+            <li>主 CTA 从 "Continue" 直接变成 "Deploy"，承诺点击即上线</li>
+            <li>白色 Deploy 按钮在黑色背景下视觉权重最高</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://vercel.com/docs/deployments" target="_blank">Vercel Docs · Deployment Configuration <span class="arrow">↗</span></a>
+            <a href="https://vercel.com/docs/cli/deploy" target="_blank">Vercel CLI Reference <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-mock vercel-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">vercel.com/acme-design/next-marketing-site</span>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;color:#888;letter-spacing:0.08em;margin-bottom:8px;">BUILDING</div>
+            <div style="background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;font-size:11px;color:#999;line-height:1.7;">
+              <div>$ git clone ...</div>
+              <div><span style="color:#2fa84f;">✓</span> Cloning repository</div>
+              <div><span style="color:#2fa84f;">✓</span> Installing dependencies (46s)</div>
+              <div><span style="color:#2fa84f;">✓</span> Building (18s)</div>
+              <div><span style="color:#2fa84f;">✓</span> Optimizing images</div>
+              <div><span style="color:#2fa84f;">✓</span> Deploying to Edge Network</div>
+              <div style="color:#2fa84f;margin-top:8px;">● Ready · https://next-marketing-site.vercel.app</div>
+            </div>
+          </div>
+          <div style="width:200px;">
+            <div class="deploy-status">
+              <div class="check-circle">✓</div>
+              <div style="font-size:14px;font-weight:600;">Deployed</div>
+              <div class="url">next-marketing<br/>-site.vercel.app</div>
+              <button class="ui-btn" style="background:#fff;color:#000;margin-top:14px;font-size:11px;padding:6px 12px;">Visit ↗</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 03 · 成功</div>
+        <h3>构建过程可视化：把等待变成表演</h3>
+        <p class="desc">
+          构建 1-2 分钟是必然的。Vercel 没有用一个静态 spinner 糊弄过去，而是 <strong>把整个 build 过程翻译成半透明终端日志</strong>，让用户看到每一步在发生什么。
+          完成后右侧立即给出生产 URL 和 Visit 按钮，用户可以秒点预览。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>终端风日志对开发者极度友好，把不可控等待变成确定性过程</li>
+            <li>每行日志前的绿色 ✓ 构成渐进式完成感</li>
+            <li>完成态的大对勾圆圈 + URL 是整个流程的 "多巴胺 moment"</li>
+            <li>"Visit ↗" 按钮使用外部跳转箭头，暗示 "点击即查看真实网站"</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://vercel.com/docs/production-checklist" target="_blank">Vercel Docs · Production Checklist <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>设计分析 · Vercel 范式</h3>
+      <div class="analysis-grid">
+        <div class="analysis-col">
+          <h4>交互与信息架构</h4>
+          <p><strong>3 步极致压缩。</strong>不是 "我们只做 3 步"，而是 "我们把一切自动化后只剩 3 步"。自动检测承担了大量工作。</p>
+          <p><strong>高级选项全部折叠。</strong>环境变量、Build Command 这些对高手重要的字段对新手不可见。</p>
+          <p><strong>Build 过程透明化。</strong>不隐藏等待时间，反而把它包装成价值展示。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>文案与引导策略</h4>
+          <p><strong>"Let's build something new" 而非 "Create a project"。</strong>文案站在用户视角，充满可能性。</p>
+          <p><strong>"Detected ✓" 的安抚效果。</strong>这三个字是 Vercel 整个配置页的定心丸 —— 告诉用户系统已经替你决定。</p>
+          <p><strong>动词 CTA 直接承诺结果。</strong>按钮不叫 "Continue" 而叫 "Deploy"，用户知道点击后会发生什么。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>视觉风格</h4>
+          <p><strong>纯黑 + 纯白的对比。</strong>黑底白字是 Vercel 的品牌基因，也让 "Deploy" 白按钮成为视觉焦点。</p>
+          <p><strong>终端美学。</strong>日志用 monospace + 绿色对勾，致敬开发者的日常工作环境。</p>
+          <p><strong>几何极简。</strong>没有任何插画、emoji、动效干扰，所有视觉都为 "快速部署" 这个唯一目标服务。</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <strong>可复用模式</strong> 当你的产品服务开发者、且核心任务可以通过自动检测减少用户输入时，Vercel 是最佳参考。核心三件套：自动化检测承担决策、高级选项折叠隐藏、过程终端化可视。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CASE 4: PERPLEXITY ============ -->
+  <section class="case" id="perplexity">
+    <div class="case-header">
+      <div>
+        <div class="num">CASE 04 / 05</div>
+        <h2>Perplexity · AI 偏好个性化</h2>
+        <p class="subtitle">对话式范式。AI 产品独有的 onboarding 姿态 —— 把参数设置伪装成 "聊天"，让用户感到是在调教自己的助手而不是填表。</p>
+        <div class="tags">
+          <span class="tag">AI 产品</span>
+          <span class="tag">个性化偏好</span>
+          <span class="tag">对话式</span>
+          <span class="tag">渐进收集</span>
+        </div>
+      </div>
+      <div class="brand-chip brand-perplexity">P</div>
+    </div>
+
+    <div class="flow-overview">
+      <div class="flow-step-mini"><div class="n">STEP 01</div><div class="t">身份打招呼</div><div class="d">名字 + 基础信息</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 02</div><div class="t">兴趣领域</div><div class="d">多选兴趣标签</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 03</div><div class="t">语气偏好</div><div class="d">回答风格选择</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 04</div><div class="t">首次提问</div><div class="d">引导式 prompt 示例</div></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-mock perplexity-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">perplexity.ai/onboarding</span>
+        </div>
+        <div class="ai-greeting">
+          <div class="avatar"></div>
+          <div style="font-size:15px;color:var(--ink);font-weight:500;">嗨！👋 我是 Perplexity，你的 AI 研究搭档。</div>
+          <div style="font-size:13px;color:var(--ink-2);margin-top:6px;">为了给你更合适的回答，我想先了解一点关于你的信息。花 30 秒就行。</div>
+        </div>
+        <label class="ui-label">你叫什么名字？</label>
+        <input class="ui-input" value="Zhouxing" />
+        <label class="ui-label" style="margin-top:10px;">你的职业是？</label>
+        <div class="chip-grid">
+          <span class="chip">学生</span>
+          <span class="chip active">设计师</span>
+          <span class="chip">工程师</span>
+          <span class="chip">研究员</span>
+          <span class="chip">运营</span>
+        </div>
+        <button class="ui-btn w-full" style="margin-top:20px;">继续</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 01 · 破冰</div>
+        <h3>AI 产品的开场白：先打招呼再问问题</h3>
+        <p class="desc">
+          这是 AI 产品区别于传统 SaaS 最大的地方 —— onboarding 的第一屏不是 Logo + Welcome 标题，而是 <strong>AI 对用户说的第一句话</strong>。
+          "嗨！我是 Perplexity..." 建立了一个对话关系，后续所有的字段收集都变成 AI "想了解你" 的合理动作。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>AI 头像 + 问候文案作为视觉对话气泡，强化拟人化</li>
+            <li>"花 30 秒就行" 明确时间承诺，降低退出率</li>
+            <li>身份使用 chip 单选而非下拉，可视化、快速</li>
+            <li>职业选项覆盖 Perplexity 核心用户画像，不做全量列表</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.perplexity.ai/hub/getting-started" target="_blank">Perplexity · Getting Started Hub <span class="arrow">↗</span></a>
+            <a href="https://www.perplexity.ai/help-center/en/articles/10354975-getting-started-with-perplexity" target="_blank">Perplexity Help Center <span class="arrow">↗</span></a>
+            <a href="https://refero.design/flows" target="_blank">Refero · AI 产品 Onboarding 合集 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-mock perplexity-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">perplexity.ai/onboarding/interests</span>
+        </div>
+        <div class="ai-greeting">
+          <div class="avatar"></div>
+          <div style="font-size:14px;color:var(--ink);">你对哪些领域最感兴趣？<br/><span style="color:var(--ink-3);font-size:13px;">选 3 个以上，这样我能给你更精准的回答。</span></div>
+        </div>
+        <div class="chip-grid">
+          <span class="chip active">科技 · Tech</span>
+          <span class="chip active">设计 · Design</span>
+          <span class="chip">商业 · Business</span>
+          <span class="chip active">AI/ML</span>
+          <span class="chip">金融 · Finance</span>
+          <span class="chip active">创业 · Startup</span>
+          <span class="chip">科学研究</span>
+          <span class="chip">文化艺术</span>
+          <span class="chip">生活方式</span>
+          <span class="chip">健康</span>
+          <span class="chip">教育</span>
+          <span class="chip">体育</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-4);margin-top:14px;">已选 4 个 · 可随时在 Settings 调整</div>
+        <button class="ui-btn w-full" style="margin-top:14px;">继续</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 02 · 兴趣</div>
+        <h3>多选 chip：视觉密度与选择自由的平衡</h3>
+        <p class="desc">
+          12 个兴趣领域用 chip grid 展示，允许多选但提示 "选 3 个以上"。这比传统的下拉菜单让用户更愿意探索选项 —— 视觉上一次看完全部，物理层面点击即选。
+          已选状态直接用品牌色填充，反馈极强。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>领域分类参考产品搜索数据，避免冷门选项混入</li>
+            <li>已选 count 实时反馈，让用户知道自己离 "推荐选数" 还有多远</li>
+            <li>"可随时在 Settings 调整" 提示，消除 "选错了怎么办" 焦虑</li>
+            <li>chip 随便顺序但热门领域靠前，提高选中率</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.perplexity.ai/help-center/en/articles/12742827-perplexity-enterprise-onboarding-guide" target="_blank">Perplexity Enterprise Onboarding <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-mock perplexity-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">perplexity.ai/onboarding/tone</span>
+        </div>
+        <div class="ai-greeting">
+          <div class="avatar"></div>
+          <div style="font-size:14px;color:var(--ink);">你希望我用什么语气回答？</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+          <div style="background:#fff;border:2px solid #20808d;border-radius:10px;padding:14px;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">🎯 专业 · 简洁</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">"根据 2025 年的数据，该指标增长 23%。"</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">💬 对话式 · 友好</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">"有意思的问题！让我来看看 —— 根据最新数据..."</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">📚 学术 · 详尽</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">"研究表明[1]，该现象存在以下三个因素..."</div>
+          </div>
+        </div>
+        <button class="ui-btn w-full" style="margin-top:18px;">继续</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 03 · 语气</div>
+        <h3>用示例句子让抽象偏好变具体</h3>
+        <p class="desc">
+          "专业" 和 "对话式" 这种抽象标签让用户难以判断。Perplexity 的巧思是 <strong>在每个选项下展示一句示例回答</strong>，用户一眼就能感受到差异。
+          这是 AI 产品独特的 onboarding 挑战：如何让用户理解 "你会得到什么体验"。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>示例句子用引号 + 斜体暗示 "这是 AI 的回答"</li>
+            <li>三个选项差异度要足够大，不要细粒度微调</li>
+            <li>Emoji 作为视觉锚点，用户能凭直觉快速识别</li>
+            <li>默认选中 "专业简洁"，对应 Perplexity 主打的研究型用户</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.perplexity.ai/" target="_blank">Perplexity · 官网 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-mock perplexity-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">perplexity.ai</span>
+        </div>
+        <div style="text-align:center;padding:16px 0 20px;">
+          <div style="font-size:13px;color:var(--ink-3);">全部搞定 ✨ 来问我第一个问题吧</div>
+        </div>
+        <div class="search-box">
+          <span style="font-size:14px;">🔍</span>
+          <span class="ph">Ask anything...</span>
+          <span style="background:var(--accent-soft);padding:2px 8px;border-radius:4px;font-size:11px;color:var(--ink-3);">Pro</span>
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:var(--ink-4);letter-spacing:0.1em;">试试这些:</div>
+        <div class="chip-grid" style="margin-top:8px;">
+          <span class="chip">2025 最值得关注的设计趋势</span>
+          <span class="chip">AI 产品的 onboarding 设计模式</span>
+          <span class="chip">对比 Figma 和 Sketch</span>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 04 · 启动</div>
+        <h3>根据前三步推荐第一个问题</h3>
+        <p class="desc">
+          Perplexity 的最后一步非常聪明：根据用户选择的职业（设计师）和兴趣（设计、AI），直接推荐了 3 个相关 prompt。
+          这解决了 AI 产品最大的 "空画布" 问题 —— <strong>用户不知道该问什么</strong>。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>推荐 prompt 根据前置问卷答案动态生成，而不是静态列表</li>
+            <li>搜索框右侧 "Pro" 徽章自然引入产品升级路径</li>
+            <li>"试试这些" 小字提示点击 chip 即会触发搜索</li>
+            <li>去掉所有 onboarding 视觉装饰，立即切换到产品主界面</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.perplexity.ai/changelog/what-we-shipped---february-6th-2026" target="_blank">Perplexity Changelog <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>设计分析 · Perplexity 范式</h3>
+      <div class="analysis-grid">
+        <div class="analysis-col">
+          <h4>交互与信息架构</h4>
+          <p><strong>把设置伪装成对话。</strong>每一步都是 AI 问一个问题，用户回答一个问题。没有 "Settings" 这种词出现。</p>
+          <p><strong>基于答案个性化推荐。</strong>最后一步的推荐 prompt 是前三步输入的结果，让 onboarding 本身有了意义闭环。</p>
+          <p><strong>Chip 作为选择主形态。</strong>相比 radio 或 dropdown，chip 的点击决策成本最低。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>文案与引导策略</h4>
+          <p><strong>第一人称对话。</strong>"我是 Perplexity"、"我想了解你" —— AI 作为主体发出邀请，不是系统在分发表单。</p>
+          <p><strong>示例胜过形容词。</strong>"专业" 这个词无法传递信息，但 "根据 2025 年数据..." 这句话立刻让用户 get 到风格。</p>
+          <p><strong>"随时可调" 反复强调。</strong>与 Linear 一样，消除用户选错焦虑是贯穿全程的策略。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>视觉风格</h4>
+          <p><strong>青绿渐变气泡。</strong>品牌色 #20808d 只用在 AI 发言气泡和主按钮上，其他区域保持白净。</p>
+          <p><strong>柔和圆角。</strong>chip 和 card 的圆角统一用较大值（10-16px），比方块更友好、更像对话。</p>
+          <p><strong>Emoji 节制使用。</strong>只在关键位置使用（打招呼、语气选择），不泛滥。</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <strong>可复用模式</strong> 当你的产品是 AI 驱动、需要收集用户偏好来个性化输出时，Perplexity 是最佳参考。核心三件套：对话式文案替代表单语言、示例输出让抽象偏好具体化、收集结果反哺首屏推荐。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CASE 5: NOTION ============ -->
+  <section class="case" id="notion">
+    <div class="case-header">
+      <div>
+        <div class="num">CASE 05 / 05</div>
+        <h2>Notion · 角色驱动的模板引导</h2>
+        <p class="subtitle">模板范式。Notion 的 onboarding 解决的是 "白画布焦虑" —— 通过用户角色 + 使用场景两层筛选，在第一屏给出可运行的工作流模板。</p>
+        <div class="tags">
+          <span class="tag">SaaS</span>
+          <span class="tag">角色问卷</span>
+          <span class="tag">模板引导</span>
+          <span class="tag">空画布解法</span>
+        </div>
+      </div>
+      <div class="brand-chip brand-notion">N</div>
+    </div>
+
+    <div class="flow-overview">
+      <div class="flow-step-mini"><div class="n">STEP 01</div><div class="t">基本身份</div><div class="d">名字 + 头像</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 02</div><div class="t">使用场景</div><div class="d">个人 / 团队 / 学校</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 03</div><div class="t">选择模板</div><div class="d">基于场景推荐 6-9 个</div></div>
+      <div class="flow-step-mini"><div class="n">STEP 04</div><div class="t">进入编辑器</div><div class="d">模板已加载 + 首个 tooltip</div></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-mock notion-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">notion.so/signup</span>
+        </div>
+        <div style="text-align:center;padding:8px 0 20px;">
+          <div style="width:36px;height:36px;background:#000;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">N</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="ui-title">Welcome! How should we call you?</div>
+          <div class="ui-sub">This will be displayed on your profile.</div>
+        </div>
+        <div style="margin-top:20px;">
+          <label class="ui-label">YOUR NAME</label>
+          <input class="ui-input" value="Zhouxing Lu" />
+          <label class="ui-label">DISPLAY PHOTO</label>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ffdab0,#ff8a65);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:600;">Z</div>
+            <span style="font-size:12px;color:var(--ink-3);">Upload photo (optional)</span>
+          </div>
+        </div>
+        <button class="ui-btn w-full" style="margin-top:16px;">Continue</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 01 · 称呼</div>
+        <h3>最小化身份字段：只要名字</h3>
+        <p class="desc">
+          Notion 只要名字。头像可选（自动根据首字母生成彩色渐变）。
+          产品假设是 <strong>"我们不需要了解你，只需要知道怎么称呼你"</strong>。邮箱已在注册时获取，公司、职位等信息放到后面的步骤按需收集。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>自动生成的渐变头像降低 "必须上传" 的压力</li>
+            <li>"How should we call you?" 比 "Enter your name" 更温暖</li>
+            <li>副文案说明 "This will be displayed on your profile"，告知字段用途</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.candu.ai/blog/how-notion-crafts-a-personalized-onboarding-experience-6-lessons-to-guide-new-users" target="_blank">Candu · Notion Onboarding 6 Lessons <span class="arrow">↗</span></a>
+            <a href="https://pageflows.com/post/desktop-web/onboarding/notion/" target="_blank">PageFlows · Notion Desktop Flow <span class="arrow">↗</span></a>
+            <a href="https://goodux.appcues.com/blog/notions-lightweight-onboarding" target="_blank">GoodUX · Notion 模板化引导 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-mock notion-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">notion.so/onboarding/usecase</span>
+        </div>
+        <div style="text-align:center;padding:8px 0 16px;">
+          <div class="ui-title">How will you use Notion?</div>
+          <div class="ui-sub">We'll set up your workspace based on your answer.</div>
+        </div>
+        <div class="q-block selected">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">👤</span>
+            <div>
+              <div class="q-title">For personal use</div>
+              <div class="q-desc">Write, plan, organize your life.</div>
+            </div>
+          </div>
+        </div>
+        <div class="q-block">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">👥</span>
+            <div>
+              <div class="q-title">With my team</div>
+              <div class="q-desc">Manage docs, projects, and wikis together.</div>
+            </div>
+          </div>
+        </div>
+        <div class="q-block">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">🎓</span>
+            <div>
+              <div class="q-title">For school</div>
+              <div class="q-desc">Take class notes, organize assignments.</div>
+            </div>
+          </div>
+        </div>
+        <button class="ui-btn w-full" style="margin-top:12px;">Continue</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 02 · 场景</div>
+        <h3>一次三岔口：决定后续所有分支</h3>
+        <p class="desc">
+          这是 Notion 整个 onboarding 里最重要的一步。用户选 "个人 / 团队 / 学校" 后，<strong>整个产品的模板库、默认工作区结构、邀请流程都会基于此分岔</strong>。
+          三个选项用大卡片 + emoji + 描述，让决策变得感性而非理性。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>每张卡片都有明确的 "做什么" 描述，不只是标签</li>
+            <li>选中态用 2px 黑色边框，和 Notion 简朴设计语言一致</li>
+            <li>默认不选中任何一项，强制用户主动选择以触发正确的后续分支</li>
+            <li>Emoji 比自定义 icon 更节省资源且全球通用</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://uxguide.co/notion-onboarding-new-users-0c026fc6ca11" target="_blank">UX Guide · Notion 新用户引导 <span class="arrow">↗</span></a>
+            <a href="https://www.durran.co/blog/notion---onboarding-new-users-through-complex-workflows" target="_blank">Durran · Notion Complex Workflows <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-mock notion-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">notion.so/onboarding/templates</span>
+        </div>
+        <div class="ui-title">Pick a template to start</div>
+        <div class="ui-sub">Or start with a blank page. You can add more later.</div>
+        <div class="template-grid" style="margin-top:14px;">
+          <div class="template-card">
+            <div class="icon">📝</div>
+            <div class="title">Journal</div>
+            <div>Daily notes & reflection</div>
+          </div>
+          <div class="template-card" style="border:2px solid var(--ink);padding:9px;">
+            <div class="icon">✅</div>
+            <div class="title">Tasks</div>
+            <div>To-dos & projects</div>
+          </div>
+          <div class="template-card">
+            <div class="icon">📚</div>
+            <div class="title">Reading</div>
+            <div>Book tracker</div>
+          </div>
+          <div class="template-card">
+            <div class="icon">💡</div>
+            <div class="title">Ideas</div>
+            <div>Brainstorming board</div>
+          </div>
+          <div class="template-card">
+            <div class="icon">🎯</div>
+            <div class="title">Goals</div>
+            <div>Quarterly OKRs</div>
+          </div>
+          <div class="template-card">
+            <div class="icon">✈️</div>
+            <div class="title">Travel</div>
+            <div>Trip planning</div>
+          </div>
+        </div>
+        <button class="ui-btn w-full" style="margin-top:14px;">Use Tasks template</button>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 03 · 模板</div>
+        <h3>用可运行的模板消除 "白画布焦虑"</h3>
+        <p class="desc">
+          Notion 是典型的 "无限可能的工具"，对新用户的挑战恰恰是 —— <strong>面对空白页不知道从何开始</strong>。
+          模板选择页把这个问题解决在 onboarding 阶段：用户进入产品的第一个 workspace 就已经有结构和示例数据。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>6-9 个模板是经过测试的黄金数量，既不会少到无选择也不会多到瘫痪</li>
+            <li>模板根据 Step 02 的场景选择动态变化（个人 vs 团队完全不同）</li>
+            <li>每张卡片文字极少（标题 + 一句描述），视觉为主</li>
+            <li>"Or start with a blank page" 保留熟手快速跳过路径</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://super.so/templates/notion-onboarding-templates" target="_blank">Super.so · Notion 模板合集 <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-mock notion-mock">
+        <div class="browser-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="addr">notion.so/Zhouxings-Workspace</span>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div style="width:160px;background:#fafaf8;border-radius:6px;padding:10px;font-size:11px;color:var(--ink-3);">
+            <div style="color:var(--ink);font-weight:600;margin-bottom:8px;">Zhouxing's Notion</div>
+            <div style="margin-bottom:4px;">📝 Journal</div>
+            <div style="margin-bottom:4px;color:var(--ink);font-weight:600;">✅ Tasks</div>
+            <div style="margin-bottom:4px;">🎯 Goals</div>
+            <div style="margin-top:12px;color:var(--ink-4);font-size:10px;letter-spacing:0.08em;">SHARED</div>
+            <div style="margin-top:4px;color:var(--ink-4);">+ Add page</div>
+          </div>
+          <div style="flex:1;padding:6px 10px;">
+            <div style="font-size:22px;font-weight:700;margin-bottom:4px;">Tasks</div>
+            <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;">My projects & to-dos</div>
+            <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+              <span style="width:12px;height:12px;border:1.5px solid var(--ink-4);border-radius:3px;"></span>
+              <span>Finish design review</span>
+              <span style="margin-left:auto;color:var(--ink-4);font-size:10px;">Today</span>
+            </div>
+            <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+              <span style="width:12px;height:12px;border:1.5px solid var(--ink-4);border-radius:3px;"></span>
+              <span>Reply to onboarding feedback</span>
+              <span style="margin-left:auto;color:var(--ink-4);font-size:10px;">Tomorrow</span>
+            </div>
+            <!-- Tooltip -->
+            <div style="position:relative;margin-top:20px;background:#000;color:#fff;border-radius:8px;padding:12px;font-size:12px;">
+              <div style="font-weight:600;margin-bottom:4px;">💡 Pro tip</div>
+              <div style="color:rgba(255,255,255,0.75);">Type <span style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;font-family:ui-monospace,monospace;">/</span> anywhere for slash commands.</div>
+              <div style="position:absolute;top:-6px;left:20px;width:10px;height:10px;background:#000;transform:rotate(45deg);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-info">
+        <div class="step-label">STEP 04 · 动手</div>
+        <h3>进入产品立即可见第一个 tooltip</h3>
+        <p class="desc">
+          传统 onboarding 到 Step 3 就结束了。Notion 的 Step 4 是 —— 进入产品主界面，但叠加一个黑色 tooltip 教你第一个核心快捷键（<code>/</code> 唤起 slash command）。
+          这让 <strong>onboarding 和产品使用无缝衔接</strong>，用户不用在 "教程" 和 "实战" 之间切换。
+        </p>
+        <div class="info-block">
+          <h4>行动点 Action Points</h4>
+          <ul class="action-list">
+            <li>模板已经加载了示例数据，用户不用从零创建就能感受产品</li>
+            <li>Tooltip 只介绍 1 个最重要的交互，其他技巧按需触发</li>
+            <li>黑色 tooltip 与 Notion 全白界面形成最大对比，不可忽视</li>
+            <li>左侧 sidebar 展示了用户选中的全部模板，一览工作区结构</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4>辅助资源 Resources</h4>
+          <div class="resource-list">
+            <a href="https://www.candu.ai/blog/how-notion-crafts-a-personalized-onboarding-experience-6-lessons-to-guide-new-users" target="_blank">Candu · Notion Personalization 6 Lessons <span class="arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>设计分析 · Notion 范式</h3>
+      <div class="analysis-grid">
+        <div class="analysis-col">
+          <h4>交互与信息架构</h4>
+          <p><strong>角色 → 场景 → 模板的决策漏斗。</strong>每一步都收窄用户路径，但用户几乎感觉不到被引导。</p>
+          <p><strong>模板而非教程。</strong>与其教用户怎么建页面，不如直接给他一个可用的页面。</p>
+          <p><strong>嵌入式 tooltip 替代专门教程页。</strong>让用户在真实工作区内学习，而不是脱离情境。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>文案与引导策略</h4>
+          <p><strong>口语化疑问句。</strong>"How should we call you?" / "How will you use Notion?" 让问卷感消失。</p>
+          <p><strong>模板描述站在结果视角。</strong>"Daily notes & reflection" 而不是 "A journal template"。</p>
+          <p><strong>"Or start with a blank page" 永远保留。</strong>给熟手和抗拒被引导的用户留后门。</p>
+        </div>
+        <div class="analysis-col">
+          <h4>视觉风格</h4>
+          <p><strong>极致的黑白 + 点缀 emoji。</strong>Notion 整个 onboarding 用的都是产品本体的 design token，没有专门的营销视觉。</p>
+          <p><strong>大号 emoji 作为主要视觉元素。</strong>降低制作成本，也让品牌感更亲近。</p>
+          <p><strong>首字母渐变头像。</strong>当用户不上传头像时自动生成，既美观又无压力。</p>
+        </div>
+      </div>
+      <div class="takeaway">
+        <strong>可复用模式</strong> 当你的产品是开放式画布（笔记、设计、数据库等），用户容易面对空白而困惑时，Notion 是最佳参考。核心三件套：角色 + 场景两层漏斗、预填模板消除白画布焦虑、产品内嵌 tooltip 替代独立教程。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PATTERNS SUMMARY ============ -->
+  <section class="patterns" id="patterns">
+    <h2>共性模式总结</h2>
+    <p class="lede">横向对比 5 个案例，能抽离出一些跨产品、跨行业通用的 step-by-step guide 设计规律。以下是最值得沉淀为团队 design principle 的 6 条。</p>
+
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <h4>01 · "一屏一问" 是底线</h4>
+        <p>不管流程有 3 步还是 10 步，每一屏只让用户做一件事。表单字段数 ≤ 3，决策点 ≤ 1。</p>
+        <p class="ex">参考 · Linear, Perplexity</p>
+      </div>
+      <div class="pattern-card">
+        <h4>02 · 进度可见但不量化</h4>
+        <p>用点亮的 bar、对勾的 checklist 让用户感受进度，避免 "12 of 30" 这种让人退缩的精确数字。</p>
+        <p class="ex">参考 · Linear, Stripe</p>
+      </div>
+      <div class="pattern-card">
+        <h4>03 · 每次选择都给 "Later"</h4>
+        <p>"You can change this later"、"Skip for now" 是降低用户焦虑最有效的文案。出现越频繁，转化率越高。</p>
+        <p class="ex">参考 · 全部 5 个案例</p>
+      </div>
+      <div class="pattern-card">
+        <h4>04 · 敏感字段配 "为什么"</h4>
+        <p>涉及个人信息、银行卡、身份证的字段前，永远先写一句 "为什么我们需要这个"。</p>
+        <p class="ex">参考 · Stripe</p>
+      </div>
+      <div class="pattern-card">
+        <h4>05 · 自动化承担决策</h4>
+        <p>能自动检测、自动推荐的字段不要让用户选。"Detected ✓" 是最好的状态提示。</p>
+        <p class="ex">参考 · Vercel, Notion</p>
+      </div>
+      <div class="pattern-card">
+        <h4>06 · 成功态提供下一步路径</h4>
+        <p>onboarding 结束不是产品使用的开始，而是分叉。给出 2-3 条可执行的 "下一步"，不是一句 "All done!"。</p>
+        <p class="ex">参考 · Stripe, Vercel, Perplexity</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div>设计研究文档 · 由 Zhouxing 整理 · 2026年4月</div>
+    <div class="sources">
+      <div style="margin-top:12px;font-weight:600;color:var(--ink-2);">主要参考来源</div>
+      <a href="https://refero.design/" target="_blank">Refero · UI/UX Design Reference Library</a>
+      <a href="https://pageflows.com/" target="_blank">PageFlows · 产品流程录屏数据库</a>
+      <a href="https://supademo.com/" target="_blank">Supademo · Flow Teardowns</a>
+      <a href="https://www.candu.ai/blog" target="_blank">Candu · Onboarding UX Research</a>
+      <a href="https://goodux.appcues.com/" target="_blank">GoodUX by Appcues</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
