@@ -291,7 +291,7 @@
     color: var(--ink-4);
   }
 
-  footer .claude-badge {
+  footer .qoder-badge {
     font-size: 11px;
     font-weight: 600;
     padding: 3px 10px;
@@ -309,6 +309,10 @@
     .stats { gap: 24px; }
   }
 </style>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -318,11 +322,11 @@
   <header>
     <div class="eyebrow">Personal · Work in Progress</div>
     <h1>Zhouxing's<br><span class="dim">Playground</span></h1>
-    <p class="lede">用 Claude 创建的各种页面与实验，持续更新中。</p>
+    <p class="lede">用 Qoder 创建的各种页面与实验，持续更新中。</p>
     <div class="stats">
       <div class="stat">
         <div class="label">已发布</div>
-        <div class="value" id="count">2</div>
+        <div class="value" id="count">3</div>
       </div>
       <div class="stat">
         <div class="label">作者</div>
@@ -373,13 +377,32 @@
       </div>
     </a>
 
+    <!-- Card 03 -->
+    <a class="card card-accent-purple" href="../Enterprise/developer-center-research-report.html">
+      <div class="card-head">
+        <div class="card-icon">🔬</div>
+        <span class="card-arrow">↗</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">No. 03</div>
+        <div class="card-title">Developer Center Research · 开发者中心重构调研报告</div>
+        <div class="card-desc">基于 Vercel、Stripe、Supabase、Linear 等六家行业标杆的系统性拆解，从视觉共性、交互范式与开发者心理模型三个维度，提炼可落地的设计准则。</div>
+      </div>
+      <div class="card-footer">
+        <span class="tag">设计调研</span>
+        <span class="tag">开发者工具</span>
+        <span class="tag">DevCenter</span>
+        <span class="tag-date">2026</span>
+      </div>
+    </a>
+
   </div>
 
   <!-- Footer -->
   <footer>
-    <p>© 2025 Zhouxing · All pages built with Claude</p>
+    <p>© 2025 Zhouxing · All pages built with Qoder</p>
     <div class="made-with">
-      Made with <span class="claude-badge">Claude</span>
+      Made with <span class="qoder-badge">Qoder</span>
     </div>
   </footer>
 

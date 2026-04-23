@@ -39,14 +39,198 @@
   }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 80px 48px 120px; }
 
-  /* ---------- Cover ---------- */
-  .cover { padding: 40px 0 64px; border-bottom: 1px solid var(--line); margin-bottom: 64px; }
-  .eyebrow { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 24px; }
-  h1.title { font-size: 56px; line-height: 1.08; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 24px; }
-  h1.title em { font-style: normal; color: var(--ink-3); font-weight: 500; }
-  .lede { font-size: 19px; color: var(--ink-2); max-width: 760px; line-height: 1.7; }
-  .meta { display: flex; gap: 40px; margin-top: 40px; color: var(--ink-3); font-size: 14px; flex-wrap: wrap; }
-  .meta span strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+  /* ---------- Cover (Dark Hero) ---------- */
+  .report-header-wrap {
+    background: #0C0C0E;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  .report-header-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .report-header-wrap::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,116,255,0.10) 0%, rgba(107,87,255,0.06) 40%, transparent 70%);
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .report-header {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 56px 24px 48px;
+  }
+  .report-header .header-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #93C5FD;
+    background: rgba(59,116,255,0.15);
+    border: 1px solid rgba(59,116,255,0.25);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .report-header h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: #F5F5F7;
+    margin-bottom: 16px;
+  }
+  .report-header h1 em {
+    font-style: normal;
+    color: #9CA3AF;
+    font-weight: 400;
+  }
+  .report-header .subtitle {
+    font-size: 0.95rem;
+    color: #9CA3AF;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+  .logo-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 28px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .logo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .logo-item .logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .logo-item:hover .logo-icon { opacity: 1; }
+  .logo-item span {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #6B7280;
+    text-transform: uppercase;
+  }
+  .report-meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #6B7280;
+  }
+  .report-meta-row span { display: flex; align-items: center; gap: 6px; }
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 28px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .meta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .meta-label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+  .meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+  }
+  .meta-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Context section ---------- */
+  .context-section {
+    margin-bottom: 48px;
+  }
+  .context-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .context-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .context-lead {
+    font-size: 1rem;
+    color: var(--ink-2);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .context-body {
+    font-size: 0.92rem;
+    color: var(--ink-3);
+    line-height: 1.7;
+  }
+  .context-body strong { color: var(--ink); font-weight: 600; }
 
   /* ---------- TOC ---------- */
   .toc {
@@ -298,12 +482,13 @@
   /* Responsive */
   @media (max-width: 900px) {
     .wrap { padding: 40px 24px 80px; }
-    h1.title { font-size: 36px; }
     .step { grid-template-columns: 1fr; gap: 24px; }
     .analysis-grid { grid-template-columns: 1fr; gap: 20px; }
     .flow-overview, .flow-overview.cols-3 { grid-template-columns: 1fr 1fr; }
     .case-header { flex-direction: column; gap: 20px; }
     .pattern-grid { grid-template-columns: 1fr; }
+    .report-header h1 { font-size: 28px; }
+    .meta-grid { gap: 12px 16px; }
   }
 
   /* Print / PDF */
@@ -313,6 +498,10 @@
     .analysis { background: #222 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -321,23 +510,112 @@
   <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #e8e6e0;border-radius:99px;color:#1a1a1a;text-decoration:none;font-size:13px;font-weight:500;font-family:'Inter','PingFang SC',sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,1)'" onmouseout="this.style.background='rgba(255,255,255,0.85)'">← 返回首页</a>
 </div>
 
+<!-- ============ DARK HERO HEADER ============ -->
+<div class="report-header-wrap">
+  <header class="report-header">
+    <div class="header-tag">Design Research Report</div>
+    <h1>Step-by-Step Guide<br><em>五个值得参考的分步引导案例</em></h1>
+    <p class="subtitle">基于 Refero、PageFlows 等设计参考库，挑选 SaaS、金融、AI、开发工具四个领域的五个代表性 step-by-step guide，从信息架构、文案策略、视觉表达三个维度做系统性拆解。</p>
+
+      <!-- Competitor Logo Row -->
+      <div class="logo-row">
+        <div class="logo-item">
+          <div class="logo-icon" style="background:linear-gradient(135deg,#5e6ad2,#8a94ff);">L</div>
+          <span>Linear</span>
+        </div>
+        <div class="logo-item">
+          <div class="logo-icon" style="background:linear-gradient(135deg,#635bff,#8a85ff);">S</div>
+          <span>Stripe</span>
+        </div>
+        <div class="logo-item">
+          <div class="logo-icon" style="background:#000;">▲</div>
+          <span>Vercel</span>
+        </div>
+        <div class="logo-item">
+          <div class="logo-icon" style="background:linear-gradient(135deg,#20808d,#1fb8cd);">P</div>
+          <span>Perplexity</span>
+        </div>
+        <div class="logo-item">
+          <div class="logo-icon" style="background:#f7f7f5;color:#000;">N</div>
+          <span>Notion</span>
+        </div>
+      </div>
+
+      <div class="report-meta-row">
+        <span>2026.04</span>
+        <span style="color:#3F3F46;">|</span>
+        <span>5 个产品 · 20+ 界面 · 3 维度拆解</span>
+      </div>
+
+      <!-- Tech Stack Metadata -->
+      <div class="meta-grid">
+        <div class="meta-group">
+          <div class="meta-label">调研竞品</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#5E6AD2;"></span>Linear</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#635BFF;"></span>Stripe</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#000;"></span>Vercel</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#20808d;"></span>Perplexity</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#f7f7f5;"></span>Notion</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">数据来源</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#0ea5e9;"></span>Refero.design</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#f59e0b;"></span>PageFlows</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#8b5cf6;"></span>Supademo</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">生成时间</div>
+          <div class="meta-badges">
+            <span class="meta-badge">2026.04.20</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">Model</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#d97706;"></span>Claude Sonnet 4</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">IDE</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#10b981;"></span>Qoder CLI</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">MCP</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#6b57ff;"></span>Refero MCP</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#0ea5e9;"></span>Preview MCP</span>
+          </div>
+        </div>
+        <div class="meta-group">
+          <div class="meta-label">Skills</div>
+          <div class="meta-badges">
+            <span class="meta-badge"><span class="meta-dot" style="background:#2f9e65;"></span>deep-research</span>
+            <span class="meta-badge"><span class="meta-dot" style="background:#2f9e65;"></span>frontend-design</span>
+          </div>
+        </div>
+      </div>
+    </header>
+  </div>
+
 <div class="wrap">
 
-  <!-- ============ COVER ============ -->
-  <header class="cover">
-    <div class="eyebrow">Design Research · Step-by-Step Guide · 2026</div>
-    <h1 class="title">Step-by-Step Guide<br/><em>五个值得参考的分步引导案例</em></h1>
-    <p class="lede">
-      这份研究基于 Refero、Page Flows 等设计参考库，挑选了 SaaS、金融、AI、开发工具四个领域的五个代表性 step-by-step guide。
-      每个案例都从 <strong>信息架构 → 文案策略 → 视觉表达</strong> 三个维度做了拆解，目的是沉淀一份可复用的分步引导设计模式手册，供后续产品设计参考。
+  <!-- ============ CONTEXT ============ -->
+  <section class="context-section">
+    <div class="context-label">Context / 上下文</div>
+    <h2 class="context-title">研究背景与核心问题</h2>
+    <p class="context-lead">
+      用户在首次使用 SaaS、金融、AI 工具时，<strong>分步引导（Step-by-Step Guide）</strong>是将注册用户转化为活跃用户的关键环节。然而，大量产品的 onboarding 流程仍停留在"填表单"阶段，导致用户流失率居高不下。
     </p>
-    <div class="meta">
-      <span><strong>案例数量</strong>5 个</span>
-      <span><strong>覆盖领域</strong>SaaS · Fintech · Dev Tool · AI</span>
-      <span><strong>分析维度</strong>交互 · 文案 · 视觉</span>
-      <span><strong>文档类型</strong>HTML 设计研究</span>
-    </div>
-  </header>
+    <p class="context-body">
+      本报告解决的核心问题是：<strong>顶级产品如何设计分步引导？</strong>它们在信息架构、文案策略和视觉表达上有哪些共性模式？通过拆解 Linear、Stripe、Vercel、Perplexity、Notion 五个代表性案例，我们旨在沉淀一份<strong>可复用的分步引导设计模式手册</strong>，为后续产品的 onboarding 优化提供言之有物的理论依据。
+    </p>
+  </section>
 
   <!-- ============ TOC ============ -->
   <nav class="toc">

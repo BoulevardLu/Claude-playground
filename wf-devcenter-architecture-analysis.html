@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Worldfirst Dev Center · 架构形态分析</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#ffffff',
+      primaryTextColor: '#0f172a',
+      primaryBorderColor: '#cbd5e1',
+      lineColor: '#94a3b8',
+      fontFamily: 'ui-sans-serif, system-ui',
+      fontSize: '14px'
+    },
+    flowchart: { curve: 'basis', padding: 14 }
+  });
+</script>
+<style>
+  :root {
+    --wf-ink: #0f172a;
+    --wf-muted: #475569;
+    --wf-line: #e2e8f0;
+    --wf-accent: #4f46e5;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: ui-sans-serif, -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--wf-ink);
+    font-feature-settings: "ss01", "cv11";
+  }
+  .prose-wf p { color: var(--wf-muted); line-height: 1.75; }
+  .prose-wf strong { color: var(--wf-ink); font-weight: 600; }
+  .screenshot-ph {
+    border: 1.5px dashed #cbd5e1;
+    background:
+      repeating-linear-gradient(45deg, #f8fafc 0 10px, #f1f5f9 10px 20px);
+  }
+  .screenshot-real {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8fafc;
+    position: relative;
+  }
+  .screenshot-real img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+  .screenshot-real .screenshot-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 12px;
+    background: linear-gradient(transparent, rgba(15,23,42,0.75));
+    color: white;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .screenshot-real .screenshot-caption a {
+    color: #93c5fd;
+    text-decoration: none;
+    font-size: 10px;
+  }
+  .screenshot-real .screenshot-caption a:hover {
+    text-decoration: underline;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .tag-good { background: #ecfdf5; color: #047857; }
+  .tag-bad  { background: #fef2f2; color: #b91c1c; }
+  .tag-mid  { background: #fefce8; color: #a16207; }
+  .tag-info { background: #eef2ff; color: #4338ca; }
+  .section-num {
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+  }
+  .mermaid { background: #fafafa; border-radius: 12px; padding: 20px; border: 1px solid var(--wf-line); }
+  .chip {
+    display: inline-flex; gap: 6px; align-items: center;
+    padding: 4px 10px; border: 1px solid var(--wf-line);
+    border-radius: 999px; font-size: 12px; color: var(--wf-muted);
+    background: white;
+  }
+  .toc a { color: var(--wf-muted); }
+  .toc a:hover { color: var(--wf-accent); }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  .ascii-ia {
+    font-family: ui-monospace, SFMono-Regular, "Menlo", monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 20px 22px;
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+  .ascii-ia .cm { color: #94a3b8; }
+  .ascii-ia .hi { color: #93c5fd; }
+  .ascii-ia .em { color: #fcd34d; }
+
+  /* ── Dark Hero Header ── */
+  .report-header-wrap {
+    background: #0C0C0E;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  .report-header-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .report-header-wrap::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,70,229,0.12) 0%, rgba(99,102,241,0.06) 40%, transparent 70%);
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .report-header {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 56px 24px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .report-header .header-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    background: rgba(79,70,229,0.15);
+    border: 1px solid rgba(79,70,229,0.25);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .report-header h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: #F5F5F7;
+    margin-bottom: 16px;
+  }
+  .report-header h1 em {
+    font-style: normal;
+    color: #9CA3AF;
+    font-weight: 400;
+  }
+  .report-header .subtitle {
+    font-size: 0.95rem;
+    color: #9CA3AF;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+  .logo-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 28px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .logo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .logo-item .logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .logo-item:hover .logo-icon { opacity: 1; }
+  .logo-item span {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #6B7280;
+    text-transform: uppercase;
+  }
+  .report-meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #6B7280;
+  }
+  .report-meta-row span { display: flex; align-items: center; gap: 6px; }
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 28px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .meta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .meta-label {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+  .meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+  }
+  .meta-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 820px) {
+    .report-header { padding: 40px 16px 36px; }
+    .logo-row { gap: 14px; }
+    .logo-item .logo-icon { width: 30px; height: 30px; font-size: 14px; }
+    .meta-grid { gap: 12px 16px; }
+  }
+  @media print {
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body class="bg-white">
+
+<!-- ═══════════ BACK BUTTON ═══════════ -->
+<div style="position:fixed;top:16px;left:16px;z-index:999;">
+  <a href="../../AI Playground/index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #e2e8f0;border-radius:99px;color:#0f172a;text-decoration:none;font-size:13px;font-weight:500;font-family:ui-sans-serif,-apple-system,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,1)'" onmouseout="this.style.background='rgba(255,255,255,0.85)'">← 返回首页</a>
+</div>
+
+<!-- ═══════════ DARK HERO HEADER ═══════════ -->
+<div class="report-header-wrap">
+  <header class="report-header">
+    <div class="header-tag">Architecture Study Report</div>
+    <h1>在「应用独立性」与「全局掌控感」之间<br><em>为 Worldfirst Dev Center 找到架构锚点</em></h1>
+    <p class="subtitle">针对 Account → Application 的双层业务结构，对标 GitHub、Stripe、Google Cloud、Vercel 四类主流 Dev Portal，从信息架构层级、上下文切换成本、信息负载三个维度拆解设计权衡。</p>
+
+    <!-- Competitor Logo Row -->
+    <div class="logo-row">
+      <div class="logo-item">
+        <div class="logo-icon" style="background:#24292f;">G</div>
+        <span>GitHub</span>
+      </div>
+      <div class="logo-item">
+        <div class="logo-icon" style="background:linear-gradient(135deg,#635bff,#8a85ff);">S</div>
+        <span>Stripe</span>
+      </div>
+      <div class="logo-item">
+        <div class="logo-icon" style="background:linear-gradient(135deg,#4285f4,#34a853);">G</div>
+        <span>Google Cloud</span>
+      </div>
+      <div class="logo-item">
+        <div class="logo-icon" style="background:#000;">▲</div>
+        <span>Vercel</span>
+      </div>
+    </div>
+
+    <div class="report-meta-row">
+      <span>2026 Q2</span>
+      <span style="color:#3F3F46;">|</span>
+      <span>4 种架构形态 · Multi-tenancy IA · B-side Dev Portal</span>
+    </div>
+
+    <!-- Tech Stack Metadata -->
+    <div class="meta-grid">
+      <div class="meta-group">
+        <div class="meta-label">对标产品</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#24292f;"></span>GitHub</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#635bff;"></span>Stripe</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#4285f4;"></span>Google Cloud</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#000;"></span>Vercel</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">数据来源</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#0ea5e9;"></span>Refero.design</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#8b5cf6;"></span>官方文档</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">生成时间</div>
+        <div class="meta-badges">
+          <span class="meta-badge">2026.04.22</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Model</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#d97706;"></span>Claude Sonnet 4</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">IDE</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#10b981;"></span>Qoder CLI</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">MCP</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#6b57ff;"></span>Refero MCP</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#0ea5e9;"></span>Preview MCP</span>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Skills</div>
+        <div class="meta-badges">
+          <span class="meta-badge"><span class="meta-dot" style="background:#2f9e65;"></span>deep-research</span>
+          <span class="meta-badge"><span class="meta-dot" style="background:#2f9e65;"></span>frontend-design</span>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<!-- ============ 顶部导航 ============ -->
+<nav class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-50 no-print">
+  <div class="max-w-[1200px] mx-auto px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">WF</div>
+      <div class="text-sm font-semibold text-slate-900">Dev Center · 架构形态分析</div>
+    </div>
+    <div class="text-xs text-slate-500 flex gap-5 toc">
+      <a href="#context">上下文</a>
+      <a href="#pattern-a">A. GitHub</a>
+      <a href="#pattern-b">B. Stripe</a>
+      <a href="#pattern-c">C. GCP</a>
+      <a href="#pattern-d">D. Vercel</a>
+      <a href="#compare">对比</a>
+      <a href="#recommend">推荐</a>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-[1200px] mx-auto px-8 py-12">
+
+  <!-- ============ 思考过程 ============ -->
+  <section id="context" class="mb-20">
+    <div class="flex items-baseline gap-3 mb-6">
+      <span class="section-num text-sm text-indigo-600 font-medium">00</span>
+      <h2 class="text-2xl font-semibold text-slate-900">交互冲突分析 · Thought Process</h2>
+    </div>
+
+    <div class="grid grid-cols-12 gap-8">
+      <div class="col-span-12 lg:col-span-7 prose-wf">
+        <p>
+          对于金融开发者平台，Account 维度的「监控需求」与 Application 维度的「沉浸式配置」之间，核心冲突不在于<em>放不放得下</em>，而在于
+          <strong>两种用户心智模型在同一屏中互相稀释</strong>——
+        </p>
+        <p>
+          <strong>Leader 的行为特征是「横向、低粒度、高频切换」</strong>：跨应用对比 API 成功率、盘点全局密钥清单、追踪各应用集成阶段。
+          这种模式要求首屏即给出多应用对比面板，每一行数据都应是「应用级的聚合」。
+        </p>
+        <p>
+          <strong>Engineer 的行为特征是「纵向、高粒度、长停留」</strong>：进入某个 Application 后，注意力长时间集中在「配 Webhook → 轮换 Key → 看错误日志」的闭环里。
+          这种模式要求强屏蔽其他应用的信息噪声，左侧导航应是当前应用的「深度目录」而非「应用切换器」。
+        </p>
+        <p>
+          <strong>冲突被金融特性放大：</strong>
+          ① 密钥、IP 白名单、生产 Endpoint 在合规上必须<span class="bg-yellow-100 px-1">精确到单应用</span>——天然要求进入应用后上下文锁死；
+          ② 异常告警、对账差异、限流熔断在风控上又天然要<span class="bg-yellow-100 px-1">Account 维度聚合</span>——天然要求有一个能穿透所有应用的"上帝视图"。
+          这两端的信息密度与操作精度要求都很高，一旦放在同一层级，要么 Leader 被配置项淹没，要么 Engineer 被全局指标干扰。
+        </p>
+        <p>
+          因此架构决策的关键不是「要不要同时支持两者」，而是<strong>用什么机制切换这两个视角</strong>——
+          是 URL 级的强切换（GitHub 式）、状态级的软切换（Stripe 式）、还是上下文选择器（GCP 式）。这正是下文四种形态的分水岭。
+        </p>
+      </div>
+
+      <aside class="col-span-12 lg:col-span-5">
+        <div class="border border-slate-200 rounded-xl p-6 bg-slate-50">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">业务输入确认</div>
+          <dl class="space-y-4 text-sm">
+            <div>
+              <dt class="font-medium text-slate-900">密钥作用域</dt>
+              <dd class="text-slate-600 mt-1">Application 级独立密钥 → <span class="tag tag-info">强边界</span></dd>
+            </div>
+            <div>
+              <dt class="font-medium text-slate-900">资金隔离</dt>
+              <dd class="text-slate-600 mt-1">完全隔离、独立结算 → <span class="tag tag-info">一类实体</span></dd>
+            </div>
+            <div>
+              <dt class="font-medium text-slate-900">权限模型</dt>
+              <dd class="text-slate-600 mt-1">Account 级统一管理 → <span class="tag tag-info">管理层叠加</span></dd>
+            </div>
+            <div>
+              <dt class="font-medium text-slate-900">Leader 监控</dt>
+              <dd class="text-slate-600 mt-1">健康度 + 资产盘点 + 集成进度 → <span class="tag tag-info">三类全局视图</span></dd>
+            </div>
+          </dl>
+          <div class="mt-5 pt-5 border-t border-slate-200 text-xs text-slate-500 leading-relaxed">
+            以上输入指向一个明确的方向：<strong class="text-slate-900">Application 是强一类实体</strong>，Account 是管理性叠加层。
+            Stripe 式单租户扁平化模式基本可以排除，重点在 A / C / D 三者之间的权衡。
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ============ PATTERN A: GitHub ============ -->
+  <!-- ============================================ -->
+  <section id="pattern-a" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="section-num text-sm text-indigo-600 font-medium">A</span>
+      <span class="tag tag-info">推荐候选</span>
+    </div>
+    <h2 class="text-3xl font-semibold text-slate-900 mb-3">GitHub Org-Repo 层级穿透模式</h2>
+    <p class="text-slate-600 max-w-3xl mb-8">
+      以 <strong>URL 强切换</strong> 实现两层视图的完全分离：Organization 与 Repository 各自拥有独立的顶部 Tab 与设置项。
+      切换通过左上角面包屑（<code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">BoulevardLu / Claude-playground</code>）完成，
+      视图之间视觉样式一致但导航项完全重载。
+    </p>
+
+    <!-- 架构示意 -->
+    <div class="grid grid-cols-12 gap-6 mb-8">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">架构示意</div>
+        <div class="mermaid">
+flowchart TD
+    U([Engineer / Leader 登录]) --> N{入口判断}
+    N -->|默认进入 Account 视图| ORG[Account · 全局层]
+    N -->|点击具体应用| APP[Application · 应用层]
+    ORG --> ORG1[Overview 聚合卡片]
+    ORG --> ORG2[Applications 列表]
+    ORG --> ORG3[Members / Security]
+    ORG --> ORG4[Audit Log / Billing]
+    ORG2 -.切换上下文.-> APP
+    APP --> APP1[Overview · 当前应用]
+    APP --> APP2[Keys & Secrets]
+    APP --> APP3[Webhooks]
+    APP --> APP4[API Logs]
+    APP --> APP5[Settings]
+    APP -.面包屑回退.-> ORG
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-5">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">信息架构层级（IA）</div>
+<div class="ascii-ia"><span class="cm">┌─ Account（/{account}）</span>
+│  ├─ Overview
+│  ├─ <span class="hi">Applications</span>           <span class="cm">← 列表/搜索/新建</span>
+│  ├─ Members
+│  ├─ Security
+│  │  └─ Audit Log
+│  └─ Billing
+│
+<span class="cm">└─ Application（/{account}/{app}）</span>
+   ├─ Overview
+   ├─ <span class="em">Keys</span>                  <span class="cm">← 应用级独立</span>
+   ├─ Webhooks
+   ├─ API Explorer
+   ├─ Logs
+   └─ Settings</div>
+      </div>
+    </div>
+
+    <!-- 截图 -->
+    <div class="mb-8">
+      <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">参考截图 · GitHub Org / Repo 导航切换</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="screenshot-real">
+          <img src="https://images.refero.design/screenshots/github.com/desktop/477355a9-96f7-4254-ae9b-cf9a9799942b_preview.jpg" alt="GitHub Organization Overview - github.com/github" loading="lazy" />
+          <div class="screenshot-caption">
+            <span>Org 级 Tab：Overview / Repositories / Projects / Packages / People</span>
+            <a href="https://refero.design/pages/4b75b7d0-4c46-41e1-91f9-49b0a688f71c" target="_blank">Refero</a>
+          </div>
+        </div>
+        <div class="screenshot-real">
+          <img src="https://images.refero.design/screenshots/github.com/desktop/657d9368-1b76-4a90-a696-7009e529ea8e_preview.jpg" alt="GitHub Repository - facebook/Ax - Repo-level tabs" loading="lazy" />
+          <div class="screenshot-caption">
+            <span>Repo 级 Tab：Code / Issues / PRs / Actions / Security / Insights + Org/Repo 面包屑</span>
+            <a href="https://refero.design/pages/d9005bb7-c704-4c9b-ab77-1c154d0f915e" target="_blank">Refero</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 体验评价 -->
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">E</span>
+          <h4 class="font-semibold">普通工程师视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> 进入应用后侧边栏即当前应用目录，<strong>沉浸度极高</strong>，不会误入其他应用。</div>
+          <div><span class="tag tag-good">Pro</span> URL 可读性强，方便分享「特定应用的 Webhook 配置页」给同事。</div>
+          <div><span class="tag tag-bad">Con</span> 跨应用对比时（比如「我这个 Webhook 在另一个应用里怎么配的」）需要两次 URL 跳转。</div>
+          <div><span class="tag tag-bad">Con</span> 新人面对「Account Tab」与「Application Tab」两套导航，学习期短暂困惑。</div>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center">L</span>
+          <h4 class="font-semibold">工程主管（Leader）视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> Account 层有独立 Overview，<strong>天然支持横向对比</strong>与全局资产盘点。</div>
+          <div><span class="tag tag-good">Pro</span> Audit Log、Members、Security 在 Account 层稳定曝光，合规审计路径短。</div>
+          <div><span class="tag tag-mid">Mid</span> 深入某应用排查时，会失去 Account 侧栏上下文，需要面包屑回退。</div>
+          <div><span class="tag tag-bad">Con</span> 若业务线再长出「应用组」概念（如按事业部分组），两层结构容量会不够。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 适用场景 -->
+    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-6">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-semibold text-indigo-700 uppercase tracking-wider">适用场景</span>
+      </div>
+      <p class="text-sm text-slate-700 leading-relaxed">
+        当 <strong>Application 确实是强一类实体</strong>（独立密钥 / 独立结算 / 独立生产域）、
+        且 <strong>Account 层的聚合视图被 Leader 高频使用</strong> 时优先选择。
+        Worldfirst 当前业务特征与本模式高度匹配，尤其适合预期未来 <code class="text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200">应用数 &lt; 20</code> 且<strong>无跨应用共享资源</strong>的场景。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ============ PATTERN B: Stripe ============ -->
+  <!-- ============================================ -->
+  <section id="pattern-b" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="section-num text-sm text-slate-500 font-medium">B</span>
+      <span class="tag tag-mid">不推荐（供对照）</span>
+    </div>
+    <h2 class="text-3xl font-semibold text-slate-900 mb-3">Stripe 单租户扁平化模式</h2>
+    <p class="text-slate-600 max-w-3xl mb-8">
+      Stripe Dashboard 以 Account 为唯一操作单位，左侧固定侧边栏承载所有功能（Payments / Customers / Products / Developers / Reports）。
+      "子实体"通过 <strong>Workspace 切换器（左上角）与 Test / Live 模式开关</strong> 表达，但<em>不构成独立的 URL 上下文</em>。
+      Stripe Connect 提供的 Connected Accounts 是少数例外场景。
+    </p>
+
+    <div class="grid grid-cols-12 gap-6 mb-8">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">架构示意</div>
+        <div class="mermaid">
+flowchart LR
+    U([用户登录]) --> DASH[单一 Dashboard]
+    DASH --> SB[左侧固定侧边栏]
+    SB --> S1[Home]
+    SB --> S2[Payments]
+    SB --> S3[Customers]
+    SB --> S4[Developers · API Keys/Webhooks/Logs]
+    SB --> S5[Settings]
+    DASH -.-> WS[顶部 Workspace 切换器]
+    DASH -.-> MODE[Test / Live 模式]
+    WS -.数据过滤.-> S2
+    WS -.数据过滤.-> S3
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-5">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">信息架构层级（IA）</div>
+<div class="ascii-ia"><span class="cm">┌─ Account（单一根节点）</span>
+│  ├─ Home · 全局指标
+│  ├─ Payments
+│  ├─ Customers
+│  ├─ Products
+│  ├─ <span class="hi">Developers</span>
+│  │   ├─ <span class="em">API Keys</span>       <span class="cm">← 全局共享</span>
+│  │   ├─ Webhooks
+│  │   ├─ Events
+│  │   └─ Logs
+│  └─ Settings
+│
+<span class="cm">└─ [横向开关]</span>
+   ├─ Workspace Switcher
+   └─ Test / Live Mode</div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">参考截图 · Stripe Dashboard</div>
+      <div class="screenshot-real rounded-lg">
+        <img src="https://images.refero.design/screenshots/stripe.com/desktop/a888bdcc-cd11-4de7-a2de-b8127e7cb0b2_preview.jpg" alt="Stripe Developer Dashboard - sidebar with Overview, API keys, Webhooks, Events, Logs" loading="lazy" />
+        <div class="screenshot-caption">
+          <span>左侧固定侧边栏 Developers（Overview / API Keys / Webhooks / Events / Logs）+ 顶部全局导航 + Test/Live Mode</span>
+          <a href="https://refero.design/pages/07b55af6-7d33-4df4-b98b-0304816500a7" target="_blank">Refero</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">E</span>
+          <h4 class="font-semibold">普通工程师视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> 导航极简，任何功能均在侧边栏一级入口内，学习曲线平缓。</div>
+          <div><span class="tag tag-good">Pro</span> 对"功能驱动"的工作方式友好（我今天要配 Webhook，直接进 Developers）。</div>
+          <div><span class="tag tag-bad">Con</span> 在多应用场景下，<strong>操作上下文靠顶部 Switcher 隐式维持</strong>，误操作风险高。</div>
+          <div><span class="tag tag-bad">Con</span> 独立密钥场景下，「这个 Key 属于哪个应用」需要额外标签语义承载，容易混淆。</div>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center">L</span>
+          <h4 class="font-semibold">工程主管（Leader）视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> 首页 Home 天然是全局视图，<strong>Leader 零成本俯视</strong>。</div>
+          <div><span class="tag tag-mid">Mid</span> 若需"按应用拆分"查看数据，需要每个模块都支持 group-by application。</div>
+          <div><span class="tag tag-bad">Con</span> 独立结算场景下，账务合并逻辑会变复杂，界面语义需大量改造。</div>
+          <div><span class="tag tag-bad">Con</span> 缺少"应用级 Overview"，应用数增长后，盘点资产必须跳到多模块再过滤。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider">适用场景</span>
+      </div>
+      <p class="text-sm text-slate-700 leading-relaxed">
+        当 <strong>Account 是唯一的商业实体</strong>、Application 只是技术侧轻标签（如多环境、多站点）、密钥与资金均全局共享时适用。
+        <strong class="text-red-700">Worldfirst 不建议采用本模式</strong>——业务输入中「独立密钥 + 独立结算」两项已明确排除此路径，
+        列出仅作为对比参照。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ============ PATTERN C: GCP ============ -->
+  <!-- ============================================ -->
+  <section id="pattern-c" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="section-num text-sm text-slate-500 font-medium">C</span>
+      <span class="tag tag-info">可借鉴</span>
+    </div>
+    <h2 class="text-3xl font-semibold text-slate-900 mb-3">Google Cloud Console Project 切换器模式</h2>
+    <p class="text-slate-600 max-w-3xl mb-8">
+      GCP 将 <strong>Project</strong>（相当于 Application）作为一等上下文，<strong>顶部 Project Picker</strong> 控制左侧服务目录内所有资源的过滤维度。
+      Organization / Folder 层则提供 IAM、计费、Policy 等"跨 Project 的元视图"，通过 <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">cloud.google.com/console/iam-admin</code>
+      这类独立路由进入。
+    </p>
+
+    <div class="grid grid-cols-12 gap-6 mb-8">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">架构示意</div>
+        <div class="mermaid">
+flowchart TD
+    U([用户]) --> TOP[顶部 Project Picker]
+    TOP --> CTX{当前 Project 上下文}
+    CTX --> SVC[左侧服务目录]
+    SVC --> S1[Compute / API / Storage ...]
+    SVC --> S2[当前 Project 的资源]
+    U --> META[Organization 元视图]
+    META --> M1[IAM &amp; Admin]
+    META --> M2[Billing]
+    META --> M3[Organization Policies]
+    META --> M4[Resource Manager]
+    TOP -.切换.-> CTX
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-5">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">信息架构层级（IA）</div>
+<div class="ascii-ia"><span class="cm">┌─ Organization（元视图）</span>
+│  ├─ IAM &amp; Admin
+│  ├─ Billing
+│  ├─ Resource Manager
+│  └─ Policies
+│
+<span class="cm">└─ Project（顶部 Picker 切换）</span>
+   └─ 左侧服务目录（随 Project 过滤）
+      ├─ APIs &amp; Services
+      │   ├─ <span class="em">Credentials</span>    <span class="cm">← Project 作用域</span>
+      │   ├─ Library
+      │   └─ Metrics
+      ├─ Monitoring
+      ├─ Logging
+      └─ Settings</div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">参考截图 · GCP Console</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 aspect-[16/10] flex flex-col items-center justify-center text-center px-6">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <div class="text-sm font-medium text-slate-700 mb-1">GCP Project Picker</div>
+          <div class="text-xs text-slate-500 leading-relaxed">GCP Console 截图未在 Refero 数据库中收录。<br/>顶部 Project 选择器展开后可搜索/切换 Project，<br/>所有左侧服务目录随之过滤。</div>
+          <a href="https://console.cloud.google.com" target="_blank" class="text-xs text-blue-600 mt-2 hover:underline">console.cloud.google.com</a>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 aspect-[16/10] flex flex-col items-center justify-center text-center px-6">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <div class="text-sm font-medium text-slate-700 mb-1">GCP IAM &amp; Admin</div>
+          <div class="text-xs text-slate-500 leading-relaxed">Organization 元视图提供跨 Project 的<br/>IAM 策略、计费、Resource Manager 等<br/>全局管理路径，与 Project 视图完全分离。</div>
+          <a href="https://console.cloud.google.com/iam-admin" target="_blank" class="text-xs text-blue-600 mt-2 hover:underline">console.cloud.google.com/iam-admin</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">E</span>
+          <h4 class="font-semibold">普通工程师视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> 切换 Project 后左侧服务目录<strong>整体重载上下文</strong>，资源安全性高。</div>
+          <div><span class="tag tag-good">Pro</span> "服务目录"式 IA 天然支持「我要找 XX 功能」心智，对 API 产品线扩展友好。</div>
+          <div><span class="tag tag-bad">Con</span> Picker 是顶部细条，<strong>误切 Project 风险长期存在</strong>（GCP 历史上的典型坑）。</div>
+          <div><span class="tag tag-bad">Con</span> 新人上手曲线陡——"Organization / Folder / Project / Service"四层概念心智成本大。</div>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center">L</span>
+          <h4 class="font-semibold">工程主管（Leader）视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> Organization 元视图提供<strong>严格的合规边界</strong>，Policy / Audit 路径清晰。</div>
+          <div><span class="tag tag-mid">Mid</span> 全局 Dashboard 能力较弱，跨 Project 聚合依赖单独的 Monitoring Workspace 配置。</div>
+          <div><span class="tag tag-bad">Con</span> 应用列表不是一等入口，必须经过 Resource Manager 才能盘点，<strong>资产俯视感弱</strong>。</div>
+          <div><span class="tag tag-bad">Con</span> 适合 IaaS / PaaS 形态的服务矩阵，对 Worldfirst 这类「单一 API 产品 × 多应用」的场景是过度设计。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-semibold text-slate-700 uppercase tracking-wider">适用场景</span>
+      </div>
+      <p class="text-sm text-slate-700 leading-relaxed">
+        当 <strong>API / 服务矩阵本身足够复杂</strong>（数十个独立子产品线、需要按服务分类的服务目录）、
+        且 <strong>企业合规要求 Policy 必须与资源分离</strong> 时适用。
+        对 Worldfirst 可部分借鉴其 <strong>Application 切换器</strong> 的交互范式（尤其是确认弹层 + 搜索 Picker），
+        但整体 IA 过重，不建议照搬。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ============ PATTERN D: Vercel ============ -->
+  <!-- ============================================ -->
+  <section id="pattern-d" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="section-num text-sm text-indigo-600 font-medium">D</span>
+      <span class="tag tag-info">推荐候选</span>
+    </div>
+    <h2 class="text-3xl font-semibold text-slate-900 mb-3">Vercel / Twilio Workspace + Resource 模式</h2>
+    <p class="text-slate-600 max-w-3xl mb-8">
+      Vercel 与 Twilio Console 共享同一套范式：
+      顶部 <strong>Team / Account 切换器</strong> + 首屏 <strong>Projects Grid</strong> + 进入 Project 后切换为<strong>项目内独立导航</strong>。
+      相比 GitHub，它的 Account 首屏是"应用仪表盘"而非"Tab 集合"，对多应用列表的可视化表达更强；
+      相比 GCP，它的应用边界是 URL 级而非 Picker 级，误操作风险更低。
+    </p>
+
+    <div class="grid grid-cols-12 gap-6 mb-8">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">架构示意</div>
+        <div class="mermaid">
+flowchart TD
+    U([用户]) --> SWITCH[顶部 Team 切换器]
+    SWITCH --> HOME[Account 首屏 · Projects Grid]
+    HOME --> G1[Project Card · App A]
+    HOME --> G2[Project Card · App B]
+    HOME --> G3[Project Card · App C]
+    HOME --> NAV[Account Tab 条]
+    NAV --> N1[Overview]
+    NAV --> N2[Usage]
+    NAV --> N3[Settings · Members / Billing]
+    G1 --> APPHOME[进入 Project · 独立侧栏]
+    APPHOME --> P1[Deployments / Logs]
+    APPHOME --> P2[Env Vars · Keys]
+    APPHOME --> P3[Webhooks / Integrations]
+    APPHOME --> P4[Settings]
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-5">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">信息架构层级（IA）</div>
+<div class="ascii-ia"><span class="cm">┌─ Account（/{team}）</span>
+│  ├─ <span class="hi">Projects</span>      <span class="cm">← 首屏 Grid</span>
+│  ├─ Usage
+│  ├─ Activity
+│  ├─ Members
+│  ├─ Integrations
+│  └─ Settings
+│
+<span class="cm">└─ Project（/{team}/{project}）</span>
+   ├─ Overview
+   ├─ Deployments / Logs
+   ├─ <span class="em">Env &amp; Keys</span>   <span class="cm">← 应用级</span>
+   ├─ Webhooks
+   ├─ Monitoring
+   └─ Settings</div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">参考截图 · Vercel / Twilio Console</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="screenshot-real">
+          <img src="https://images.refero.design/screenshots/vercel.com/desktop/d6e88f2b-d23d-4813-b09d-d7c502839343_preview.jpg" alt="Vercel Team Dashboard - Projects Grid with Overview/Integrations/Activity/Domains/Usage/Settings tabs" loading="lazy" />
+          <div class="screenshot-caption">
+            <span>Team 首屏 Projects Grid + Account Tab 条（Overview / Integrations / Activity / Settings）</span>
+            <a href="https://refero.design/pages/6d76a703-a78f-4f38-a2ad-1796337d5ca7" target="_blank">Refero</a>
+          </div>
+        </div>
+        <div class="screenshot-real">
+          <img src="https://images.refero.design/screenshots/vercel.com/desktop/1609d84b-44b3-4988-8a30-bf3f4234972f_preview.jpg" alt="Vercel Project Settings - Environment Variables with project-level sidebar navigation" loading="lazy" />
+          <div class="screenshot-caption">
+            <span>Project 内部导航：Overview / Deployments / Analytics / Settings + 独立左侧栏</span>
+            <a href="https://refero.design/pages/1517beee-f93d-4f40-a6fc-b893c7ac7ac7" target="_blank">Refero</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6 mb-8">
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">E</span>
+          <h4 class="font-semibold">普通工程师视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> 首屏卡片化选择应用后，进入项目即<strong>沉浸，无上下文歧义</strong>。</div>
+          <div><span class="tag tag-good">Pro</span> 项目卡片可直接曝光"最近部署 / 最近错误"等运行态信息，高频操作前置。</div>
+          <div><span class="tag tag-mid">Mid</span> Account Tab 与 Project Tab 是<strong>两套导航</strong>，视觉样式需强一致性才不跳脱。</div>
+          <div><span class="tag tag-bad">Con</span> 首屏是 Grid 而非工具，"刚登录就想配 Webhook"的场景需要先选应用，多一次点击。</div>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center">L</span>
+          <h4 class="font-semibold">工程主管（Leader）视角</h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div><span class="tag tag-good">Pro</span> <strong>首屏即俯视</strong>——多应用健康度、集成阶段、最近活动一屏看到。</div>
+          <div><span class="tag tag-good">Pro</span> Account Tab 承载 Members / Audit / Integrations，合规路径清晰。</div>
+          <div><span class="tag tag-good">Pro</span> 对「应用组」扩展友好——Grid 可演化为按组折叠，不破坏现有 IA。</div>
+          <div><span class="tag tag-bad">Con</span> 实施复杂度高于 A 模式——需要设计两套视觉语言并避免割裂感。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-6">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-semibold text-indigo-700 uppercase tracking-wider">适用场景</span>
+      </div>
+      <p class="text-sm text-slate-700 leading-relaxed">
+        当 <strong>Leader 侧俯视需求与 Engineer 侧沉浸需求同等重要</strong>，且多应用列表本身是重要的观察对象（健康度 / 进度聚合在应用卡片上）时最优。
+        与 Worldfirst 业务输入（三类监控需求均需一等入口）匹配度最高，是最终推荐方案的基础范式。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 对比表 ============ -->
+  <section id="compare" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-baseline gap-3 mb-6">
+      <span class="section-num text-sm text-indigo-600 font-medium">05</span>
+      <h2 class="text-2xl font-semibold text-slate-900">横向对比 · Comparison Matrix</h2>
+    </div>
+
+    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600">
+          <tr>
+            <th class="text-left px-5 py-3 font-medium w-56">评估维度</th>
+            <th class="text-left px-5 py-3 font-medium">A · GitHub<br/><span class="normal-case tracking-normal text-[11px] text-slate-400">层级穿透</span></th>
+            <th class="text-left px-5 py-3 font-medium">B · Stripe<br/><span class="normal-case tracking-normal text-[11px] text-slate-400">扁平化</span></th>
+            <th class="text-left px-5 py-3 font-medium">C · GCP<br/><span class="normal-case tracking-normal text-[11px] text-slate-400">Project 切换</span></th>
+            <th class="text-left px-5 py-3 font-medium">D · Vercel<br/><span class="normal-case tracking-normal text-[11px] text-slate-400">Workspace+Grid</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">Account 全局俯视感</td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">高</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">Application 独立性 / 沉浸度</td>
+            <td class="px-5 py-3"><span class="tag tag-good">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">低</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">高</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">上下文切换成本</td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">误操作风险（操作错应用）</td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">信息负载（首屏认知密度）</td>
+            <td class="px-5 py-3"><span class="tag tag-good">轻</span></td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">重</span></td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">对独立密钥场景的支持</td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">弱</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">对独立结算场景的支持</td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">弱</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">未来扩展"应用组"能力</td>
+            <td class="px-5 py-3"><span class="tag tag-mid">弱</span></td>
+            <td class="px-5 py-3"><span class="tag tag-mid">弱</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">强</span></td>
+          </tr>
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-700">实现复杂度（工程成本）</td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+            <td class="px-5 py-3"><span class="tag tag-good">低</span></td>
+            <td class="px-5 py-3"><span class="tag tag-bad">高</span></td>
+            <td class="px-5 py-3"><span class="tag tag-mid">中</span></td>
+          </tr>
+          <tr class="bg-indigo-50/40">
+            <td class="px-5 py-3 font-semibold text-slate-900">WF 适配度综合评分</td>
+            <td class="px-5 py-3 font-semibold text-slate-900">★★★★☆</td>
+            <td class="px-5 py-3 font-semibold text-slate-900">★★☆☆☆</td>
+            <td class="px-5 py-3 font-semibold text-slate-900">★★★☆☆</td>
+            <td class="px-5 py-3 font-semibold text-slate-900">★★★★★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 推荐 ============ -->
+  <section id="recommend" class="mb-24 pt-10 border-t border-slate-200">
+    <div class="flex items-baseline gap-3 mb-6">
+      <span class="section-num text-sm text-indigo-600 font-medium">06</span>
+      <h2 class="text-2xl font-semibold text-slate-900">收敛建议 · Recommendation for Worldfirst</h2>
+    </div>
+
+    <div class="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-2xl p-8 mb-8">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-semibold shrink-0">D+A</div>
+        <div>
+          <h3 class="text-xl font-semibold text-slate-900 mb-2">推荐：以 <em>Vercel Workspace 模式 (D)</em> 为基础范式，嵌入 <em>GitHub Org-Repo 的 URL 强边界 (A)</em></h3>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            Account 首屏采用 Projects Grid 承载 Leader 的三类监控（健康度 / 资产 / 集成进度在卡片上直接呈现）；
+            进入 Application 后切换为<strong>独立 URL + 独立侧边栏</strong>的沉浸布局，规避误操作风险；
+            Account Tab 承载 Members / Audit / Security 的合规视图。
+            这一组合在「俯视感 / 沉浸度 / 误操作防护 / 实施成本」四象限上综合最优。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-6">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">推荐架构示意</div>
+        <div class="mermaid">
+flowchart TD
+    L([Login]) --> H[Account Home · Projects Grid]
+    H --> NAV[Account Tabs]
+    NAV --> T1[Overview · 三类监控聚合]
+    NAV --> T2[Applications · 列表/筛选/新建]
+    NAV --> T3[Members · 统一权限]
+    NAV --> T4[Security &amp; Audit]
+    NAV --> T5[Settings]
+    H --> CARD[Application Card]
+    CARD -->|点击进入| APP[/account/app/]
+    APP --> SB[左侧独立侧栏]
+    SB --> A1[Overview · 健康度]
+    SB --> A2[Keys · 应用级独立]
+    SB --> A3[Webhooks]
+    SB --> A4[API Logs]
+    SB --> A5[Integration Status]
+    SB --> A6[Settings]
+    APP -.面包屑.-> H
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-5">
+        <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">关键设计原则</div>
+        <ol class="space-y-4 text-sm">
+          <li class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div>
+              <strong class="text-slate-900">URL 级上下文边界</strong>
+              <p class="text-slate-600 mt-1">进入 Application 后 URL 变化，左侧导航项完全重载，杜绝 Picker 式隐式切换导致的误操作。</p>
+            </div>
+          </li>
+          <li class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div>
+              <strong class="text-slate-900">Leader 视图 = 卡片聚合</strong>
+              <p class="text-slate-600 mt-1">首屏 Grid 每张应用卡承载「成功率 / 阶段徽章 / 密钥到期提醒」，低点击成本完成资产盘点。</p>
+            </div>
+          </li>
+          <li class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div>
+              <strong class="text-slate-900">视觉强一致避免割裂</strong>
+              <p class="text-slate-600 mt-1">Account Tab 与 Application Sidebar 使用同一套 Token，并保留常驻的「返回 Account」面包屑。</p>
+            </div>
+          </li>
+          <li class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <div>
+              <strong class="text-slate-900">为未来的「应用组」留接口</strong>
+              <p class="text-slate-600 mt-1">Grid 视图允许按 Tag / Group 折叠，URL 结构预留 <code class="text-xs bg-slate-100 px-1 rounded">/account/group/app/</code> 扩展位。</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 启发性问题 ============ -->
+  <section class="mb-20 pt-10 border-t border-slate-200">
+    <div class="flex items-baseline gap-3 mb-6">
+      <span class="section-num text-sm text-indigo-600 font-medium">07</span>
+      <h2 class="text-2xl font-semibold text-slate-900">3 个启发性问题 · Open Questions</h2>
+    </div>
+
+    <div class="space-y-4">
+      <details class="border border-slate-200 rounded-xl p-6" open>
+        <summary class="flex items-center gap-4">
+          <span class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">Q1</span>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-900">应用创建是 Leader 审批制还是 Engineer 自助制？</div>
+          </div>
+        </summary>
+        <div class="mt-4 ml-12 text-sm text-slate-600 leading-relaxed">
+          若为<strong>审批制</strong>，Account 层需要一个"Pending Applications"队列、以及沙盒到生产的晋级流，Leader 的首屏可能需要承担「待审批」这一第四类监控。
+          若为<strong>自助制</strong>，则需要考虑 Sandbox 自动发放边界、Quota 防护、以及应用命名空间的冲突解决机制——这两种路径对首屏 Grid 的内容密度影响很大。
+        </div>
+      </details>
+
+      <details class="border border-slate-200 rounded-xl p-6">
+        <summary class="flex items-center gap-4">
+          <span class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">Q2</span>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-900">生产密钥的轮换是应用级独立还是 Account 级统一策略？</div>
+          </div>
+        </summary>
+        <div class="mt-4 ml-12 text-sm text-slate-600 leading-relaxed">
+          这直接影响 Security 模块该放在 Account 还是 Application 层——或者<strong>两层都放但语义不同</strong>：
+          Account 层是<em>策略（Policy）</em>（强制 90 天轮换、禁止长期 Key），Application 层是<em>实例（Instance）</em>（具体 Key 列表、本次轮换动作）。
+          双层并存时，交互上要避免 Engineer 以为在应用内改的策略会影响全局，或反之。
+        </div>
+      </details>
+
+      <details class="border border-slate-200 rounded-xl p-6">
+        <summary class="flex items-center gap-4">
+          <span class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">Q3</span>
+          <div class="flex-1">
+            <div class="font-semibold text-slate-900">是否存在「应用组 (Application Group)」这一中间概念？</div>
+          </div>
+        </summary>
+        <div class="mt-4 ml-12 text-sm text-slate-600 leading-relaxed">
+          例如"跨境收单线 / 电商线 / 理财线"各自挂多个应用。如果业务方向预期出现事业部维度的分组，
+          那么<strong>两层结构（Account / Application）会在 12-18 个月后显得不够</strong>，需要提前在 URL、导航、权限继承模型中预留三层扩展位
+          （参考 GCP 的 Organization → Folder → Project 或 GitHub 的 Enterprise → Org → Repo）。
+          若确定不需要分组，A 模式直接实施即可；若可能需要，应从 D 模式起步。
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 结尾 ============ -->
+  <footer class="pt-12 mt-10 border-t border-slate-200 text-xs text-slate-400 flex items-center justify-between">
+    <div>Worldfirst Dev Center Architecture Study · Prepared for Engineering Leadership Review</div>
+    <div>2026 · v0.1 Draft</div>
+  </footer>
+
+</main>
+
+</body>
+</html>
